@@ -682,32 +682,40 @@ function fuseDesigns(canvasA, canvasB, options = {}) {
   } else if (mode === 'botanical-mask') {
     ctx.drawImage(canvasB, 0, 0, width, height);
 
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = width;
-    maskCanvas.height = height;
-    const mCtx = maskCanvas.getContext('2d');
-    mCtx.drawImage(canvasA, 0, 0, width, height);
+    try {
+      const maskCanvas = document.createElement('canvas');
+      maskCanvas.width = width;
+      maskCanvas.height = height;
+      const mCtx = maskCanvas.getContext('2d');
+      mCtx.drawImage(canvasA, 0, 0, width, height);
 
-    const imgData = mCtx.getImageData(0, 0, width, height);
-    const data = imgData.data;
-    const threshold = 110 + (balance - 0.5) * 120;
+      const imgData = mCtx.getImageData(0, 0, width, height);
+      const data = imgData.data;
+      const threshold = 110 + (balance - 0.5) * 120;
 
-    for (let i = 0; i < data.length; i += 4) {
-      const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
-      data[i + 3] = lum > threshold ? 245 : 20;
+      for (let i = 0; i < data.length; i += 4) {
+        const lum = 0.299 * data[i] + 0.587 * data[i + 1] + 0.114 * data[i + 2];
+        data[i + 3] = lum > threshold ? 245 : 20;
+      }
+      mCtx.putImageData(imgData, 0, 0);
+
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.drawImage(maskCanvas, 0, 0, width, height);
+      ctx.restore();
+
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = 0.25;
+      ctx.drawImage(canvasA, 0, 0, width, height);
+      ctx.restore();
+    } catch (e) {
+      ctx.save();
+      ctx.globalAlpha = Math.max(0.2, balance);
+      ctx.globalCompositeOperation = 'source-over';
+      ctx.drawImage(canvasA, 0, 0, width, height);
+      ctx.restore();
     }
-    mCtx.putImageData(imgData, 0, 0);
-
-    ctx.save();
-    ctx.globalAlpha = 0.85;
-    ctx.drawImage(maskCanvas, 0, 0, width, height);
-    ctx.restore();
-
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = 0.25;
-    ctx.drawImage(canvasA, 0, 0, width, height);
-    ctx.restore();
 
   } else if (mode === 'diagonal-split') {
     ctx.drawImage(canvasA, 0, 0, width, height);
@@ -737,40 +745,48 @@ function fuseDesigns(canvasA, canvasB, options = {}) {
   } else if (mode === 'frequency-merge') {
     ctx.drawImage(canvasB, 0, 0, width, height);
 
-    const edgeCanvas = document.createElement('canvas');
-    edgeCanvas.width = width;
-    edgeCanvas.height = height;
-    const eCtx = edgeCanvas.getContext('2d');
-    eCtx.drawImage(canvasA, 0, 0, width, height);
+    try {
+      const edgeCanvas = document.createElement('canvas');
+      edgeCanvas.width = width;
+      edgeCanvas.height = height;
+      const eCtx = edgeCanvas.getContext('2d');
+      eCtx.drawImage(canvasA, 0, 0, width, height);
 
-    const aData = eCtx.getImageData(0, 0, width, height);
-    const d = aData.data;
+      const aData = eCtx.getImageData(0, 0, width, height);
+      const d = aData.data;
 
-    for (let y = 1; y < height - 1; y += 2) {
-      for (let x = 1; x < width - 1; x += 2) {
-        const idx = (y * width + x) * 4;
-        const left = (y * width + (x - 1)) * 4;
-        const right = (y * width + (x + 1)) * 4;
-        const top = ((y - 1) * width + x) * 4;
-        const bot = ((y + 1) * width + x) * 4;
+      for (let y = 1; y < height - 1; y += 2) {
+        for (let x = 1; x < width - 1; x += 2) {
+          const idx = (y * width + x) * 4;
+          const left = (y * width + (x - 1)) * 4;
+          const right = (y * width + (x + 1)) * 4;
+          const top = ((y - 1) * width + x) * 4;
+          const bot = ((y + 1) * width + x) * 4;
 
-        const diffH = Math.abs(d[right] - d[left]);
-        const diffV = Math.abs(d[bot] - d[top]);
-        const edge = Math.min(255, (diffH + diffV) * 2.2);
+          const diffH = Math.abs(d[right] - d[left]);
+          const diffV = Math.abs(d[bot] - d[top]);
+          const edge = Math.min(255, (diffH + diffV) * 2.2);
 
-        d[idx] = edge > 40 ? 255 : 0;
-        d[idx + 1] = edge > 40 ? 255 : 0;
-        d[idx + 2] = edge > 40 ? 255 : 0;
-        d[idx + 3] = edge > 40 ? Math.min(240, edge * 1.2) : 0;
+          d[idx] = edge > 40 ? 255 : 0;
+          d[idx + 1] = edge > 40 ? 255 : 0;
+          d[idx + 2] = edge > 40 ? 255 : 0;
+          d[idx + 3] = edge > 40 ? Math.min(240, edge * 1.2) : 0;
+        }
       }
-    }
-    eCtx.putImageData(aData, 0, 0);
+      eCtx.putImageData(aData, 0, 0);
 
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = 0.9;
-    ctx.drawImage(edgeCanvas, 0, 0, width, height);
-    ctx.restore();
+      ctx.save();
+      ctx.globalCompositeOperation = 'screen';
+      ctx.globalAlpha = 0.9;
+      ctx.drawImage(edgeCanvas, 0, 0, width, height);
+      ctx.restore();
+    } catch (e) {
+      ctx.save();
+      ctx.globalCompositeOperation = 'overlay';
+      ctx.globalAlpha = 0.75;
+      ctx.drawImage(canvasA, 0, 0, width, height);
+      ctx.restore();
+    }
 
   } else if (mode === 'kaleidoscope-hybrid') {
     const halfW = width / 2;
@@ -1446,6 +1462,7 @@ function preloadPatternCanvases() {
     const ctx = c.getContext('2d');
 
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.src = item.image;
     img.onload = () => {
       ctx.drawImage(img, 0, 0, 512, 512);
@@ -1474,6 +1491,8 @@ function preloadPatternCanvases() {
   if (state.patterns[0]) {
     state.activePatternCanvas = state.patterns[0].canvas;
   }
+  updateFusionSlotsUI();
+  updateFusionPreview();
 }
 
 function setupTabRouting() {
@@ -1517,9 +1536,14 @@ function setupGallery() {
 }
 
 function renderGalleryCards() {
-  const filtered = state.currentFilter === 'all'
+  const filter = (state.currentFilter || 'all').toLowerCase();
+  const filtered = filter === 'all'
     ? state.patterns
-    : state.patterns.filter(p => p.category.toLowerCase().includes(state.currentFilter.toLowerCase()) || p.source.toLowerCase() === state.currentFilter.toLowerCase());
+    : state.patterns.filter(p => {
+        const cat = (p.category || '').toLowerCase();
+        const src = (p.source || '').toLowerCase();
+        return cat.includes(filter) || src === filter;
+      });
 
   el.galleryGrid.innerHTML = '';
 
@@ -1589,6 +1613,7 @@ function renderGalleryCards() {
     card.querySelector('[data-action="fuseA"]').addEventListener('click', () => {
       state.selectedA = p;
       updateFusionSlotsUI();
+      updateFusionPreview();
       switchTab('fusion');
       if (window.updateFabricFlowTexture) {
         window.updateFabricFlowTexture(p.canvas || p.dataUrl, `Slot A: ${p.title}`);
@@ -1599,6 +1624,7 @@ function renderGalleryCards() {
     card.querySelector('[data-action="fuseB"]').addEventListener('click', () => {
       state.selectedB = p;
       updateFusionSlotsUI();
+      updateFusionPreview();
       switchTab('fusion');
       if (window.updateFabricFlowTexture) {
         window.updateFabricFlowTexture(p.canvas || p.dataUrl, `Slot B: ${p.title}`);
@@ -1612,6 +1638,7 @@ function renderGalleryCards() {
 
 function setupFusionStudio() {
   updateFusionSlotsUI();
+  updateFusionPreview();
 
   el.slotABox.addEventListener('click', () => el.uploadInputA.click());
   el.uploadInputA.addEventListener('change', e => {
@@ -1708,23 +1735,32 @@ function updateFusionSlotsUI() {
 
 function updateFusionPreview() {
   if (!state.selectedA || !state.selectedB) return;
+  if (!el.fusionCanvas) return;
 
-  const mode = document.querySelector('input[name="fusionMode"]:checked').value;
-  const balance = parseFloat(el.fusionBalance.value);
+  const modeEl = document.querySelector('input[name="fusionMode"]:checked');
+  const mode = modeEl ? modeEl.value : 'botanical-mask';
+  const balance = el.fusionBalance ? parseFloat(el.fusionBalance.value) : 0.5;
 
-  state.fusedCanvas = fuseDesigns(state.selectedA.canvas, state.selectedB.canvas, {
+  const canvasA = state.selectedA.canvas;
+  const canvasB = state.selectedB.canvas;
+  if (!canvasA || !canvasB) return;
+
+  state.fusedCanvas = fuseDesigns(canvasA, canvasB, {
     mode,
     balance,
     width: 1024,
     height: 1024
   });
 
-  el.fusionCanvas.width = 1024;
-  el.fusionCanvas.height = 1024;
-  const ctx = el.fusionCanvas.getContext('2d');
-  ctx.drawImage(state.fusedCanvas, 0, 0);
+  if (state.fusedCanvas) {
+    el.fusionCanvas.width = 1024;
+    el.fusionCanvas.height = 1024;
+    const ctx = el.fusionCanvas.getContext('2d');
+    ctx.clearRect(0, 0, 1024, 1024);
+    ctx.drawImage(state.fusedCanvas, 0, 0);
+  }
 
-  if (window.updateFabricFlowTexture) {
+  if (window.updateFabricFlowTexture && state.fusedCanvas) {
     window.updateFabricFlowTexture(state.fusedCanvas, `Hybrid Fusion: ${state.selectedA.title} + ${state.selectedB.title}`);
   }
 }
