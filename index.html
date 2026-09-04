@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ROMATEXTILEART — Surface Pattern Designer & Textile Atelier</title>
+  <meta name="description" content="Official portfolio and interactive textile design studio of ROMATEXTILEART (ARTEXDES). 2-Design AI Fusion, 3 Curated Colorways, Seamless Repeat Engine, and Realistic Apparel Shirt Mockups." />
+  
+  <!-- PeachWeb Inspired Typography: Instrument Serif + Plus Jakarta Sans + Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;600;700;800;900&display=swap" rel="stylesheet" />
+  
+  <link rel="stylesheet" href="./style.css" />
+</head>
+<body>
+
+  <!-- PeachWeb Interactive 3D Printed Fabric Flow Simulation Canvas -->
+  <canvas id="fabricFlowCanvas" class="fabric-flow-canvas"></canvas>
+  <!-- PeachWeb Interactive 3D Background Particles Canvas -->
+  <canvas id="peachweb3dCanvas" class="peachweb-3d-canvas"></canvas>
+
+  <!-- Ambient Light Effects (Obsidian & Champagne Gold) -->
+  <div class="ambient-glow glow-1"></div>
+  <div class="ambient-glow glow-2"></div>
+  <div class="ambient-glow glow-3"></div>
+
+  <!-- Floating Liquid Glass Sculptures (Uploaded Iridescent Chromatic Ribbons) -->
+  <div id="liquidSculpturesContainer" class="liquid-sculptures-container" aria-hidden="true">
+    <!-- Sculpture 1: Golden Chromatic Liquid Ribbon (Hero & Gallery Left) -->
+    <div class="liquid-sculpture sculpture-gold sculpture-1" data-parallax="0.25" data-sway-speed="1.2" data-rot-factor="0.035" data-scale="1.0">
+      <div class="liquid-glass-inner">
+        <img src="./assets/liquid-sculpture-gold.png" alt="Liquid Gold Ribbon Sculpture" class="liquid-sculpture-img" />
+        <div class="liquid-specular-sheen"></div>
+      </div>
+    </div>
+
+    <!-- Sculpture 2: Pastel Iridescent Twisted Ribbon (Right Side, Fast Counter-Flow) -->
+    <div class="liquid-sculpture sculpture-pastel sculpture-2" data-parallax="0.52" data-sway-speed="1.6" data-rot-factor="-0.045" data-scale="0.95">
+      <div class="liquid-glass-inner">
+        <img src="./assets/liquid-sculpture-pastel.png" alt="Liquid Pastel Ribbon Sculpture" class="liquid-sculpture-img" />
+        <div class="liquid-specular-sheen"></div>
+      </div>
+    </div>
+
+    <!-- Sculpture 3: Deep Floating Ambient Golden Ring (Mid-Page Atelier) -->
+    <div class="liquid-sculpture sculpture-gold sculpture-3" data-parallax="0.38" data-sway-speed="0.9" data-rot-factor="0.05" data-scale="0.85">
+      <div class="liquid-glass-inner">
+        <img src="./assets/liquid-sculpture-gold.png" alt="Liquid Gold Ribbon Sculpture 3" class="liquid-sculpture-img" />
+        <div class="liquid-specular-sheen"></div>
+      </div>
+    </div>
+
+    <!-- Sculpture 4: Floating Iridescent Helix (Lower Page / Shirt Mockup) -->
+    <div class="liquid-sculpture sculpture-pastel sculpture-4" data-parallax="0.65" data-sway-speed="1.4" data-rot-factor="-0.03" data-scale="0.9">
+      <div class="liquid-glass-inner">
+        <img src="./assets/liquid-sculpture-pastel.png" alt="Liquid Pastel Ribbon Sculpture 4" class="liquid-sculpture-img" />
+        <div class="liquid-specular-sheen"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ HEADER & BRAND NAVIGATION ════════════ -->
+  <header class="site-header">
+    <div class="header-inner">
+      
+      <!-- Brand Profile & Official Uploaded ATD Monogram Logo -->
+      <div class="brand-wrapper" data-goto-tab="gallery">
+        <div class="brand-monogram" title="ROMATEXTILEART - Official ATD Monogram">
+          <img src="./assets/atd-logo.jpg" alt="ROMATEXTILEART ATD Logo" class="brand-monogram-img" />
+        </div>
+        <div class="brand-info">
+          <h1 class="brand-title">ROMATEXTILEART</h1>
+          <div class="brand-subtitle">
+            <span>ARTEXDES</span>
+            <span class="badge-pronoun">he/him</span>
+            <span>· 1.8M Monthly Views</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Studio Navigation Tabs -->
+      <nav class="studio-nav-bar" id="studioNavBar">
+        <button class="tab-btn active" data-tab="gallery" id="navGallery">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+          Portfolio
+        </button>
+        <button class="tab-btn" data-tab="pinterest" id="navPinterest">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+          Pinterest Feed
+        </button>
+        <button class="tab-btn" data-tab="instagram" id="navInstagram">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          Instagram
+        </button>
+        <button class="tab-btn" data-tab="fusion" id="navFusion">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg>
+          2-Design Fusion
+        </button>
+        <button class="tab-btn" data-tab="repeat" id="navRepeat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          3 Colorways & Repeat
+        </button>
+        <button class="tab-btn" data-tab="mockup" id="navMockup">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a2 2 0 001.98 1.67H6v10a2 2 0 002 2h8a2 2 0 002-2V10.83h1.16a2 2 0 001.98-1.67l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+          Shirt Drape
+        </button>
+      </nav>
+
+      <!-- All Connected Accounts Links (In-App Tab Switching) -->
+      <div class="social-channels">
+        <button class="social-pill pinterest" data-goto-tab="pinterest" title="View Pinterest Feed in this tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+          <span>Pinterest</span>
+        </button>
+        <button class="social-pill instagram" data-goto-tab="instagram" title="View Instagram Showcase in this tab">
+          <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          <span>Instagram</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ════════════ HERO BANNER (PEACHWEB EDITORIAL AESTHETIC) ════════════ -->
+  <section class="hero-section">
+    <div class="hero-card">
+      <div class="hero-top">
+        <div class="hero-bio">
+          <div class="hero-badge-live">
+            <span class="pulse-dot"></span>
+            <span>Interactive Atelier Studio · PeachWeb Edition</span>
+          </div>
+          <h2 class="hero-headline">
+            Surface Pattern Designer & <span class="serif-accent">Textile Atelier</span>
+          </h2>
+          <p class="hero-desc">
+            Creating seamless repeat patterns, curated colorway palettes, and apparel 3D draping. Synthesize multi-pin hybrid artworks or preview resort shirts in a realtime interactive studio.
+          </p>
+        </div>
+        <!-- Profile Metrics -->
+        <div class="hero-stats">
+          <div class="stat-item">
+            <span class="stat-val">1.8M+</span>
+            <span class="stat-lbl">Monthly Views</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-val">400+</span>
+            <span class="stat-lbl">Active Pins</span>
+          </div>
+          <div class="stat-divider"></div>
+          <div class="stat-item">
+            <span class="stat-val">100%</span>
+            <span class="stat-lbl">Seamless Vector</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3D Flowing Printed Fabric Status & Controls Bar -->
+      <div class="fabric-flow-bar">
+        <div class="fabric-flow-info">
+          <span class="fabric-wave-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12c3-4 6-4 9 0s6 4 9 0"/><path d="M2 17c3-4 6-4 9 0s6 4 9 0"/><path d="M2 7c3-4 6-4 9 0s6 4 9 0"/></svg>
+          </span>
+          <div class="fabric-flow-text">
+            <span class="fabric-flow-label">Active Background Fabric Flow:</span>
+            <span class="fabric-flow-title" id="activeFabricTitle">Luxury Silk Twill · Roma Print #001</span>
+          </div>
+        </div>
+        <div class="fabric-flow-actions">
+          <div class="fabric-sheen-selector">
+            <button class="fabric-sheen-btn active" data-sheen="silk">Silk Twill</button>
+            <button class="fabric-sheen-btn" data-sheen="satin">Glossy Satin</button>
+            <button class="fabric-sheen-btn" data-sheen="linen">Organic Linen</button>
+          </div>
+          <button class="btn btn-outline" id="btnToggleFabricFlow" style="padding:6px 14px; font-size:0.75rem;">
+            <span id="btnToggleFabricFlowText">Fabric Flow: ON 🌊</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Studio CTAs -->
+      <div class="hero-actions">
+        <button class="btn btn-gold" data-goto-tab="fusion">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+          Try 2-Design Fusion Studio
+        </button>
+        <button class="btn btn-glass" data-goto-tab="mockup">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a2 2 0 001.98 1.67H6v10a2 2 0 002 2h8a2 2 0 002-2V10.83h1.16a2 2 0 001.98-1.67l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+          Drape on Shirt Mockup
+        </button>
+        <button class="btn btn-glass" data-goto-tab="repeat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+          3 Colorways Studio
+        </button>
+        <button class="btn btn-outline" id="btnOpenQuote">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+          Licensing Inquiry
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ════════════ MAIN STUDIOS CONTAINER ════════════ -->
+  <main class="main-wrapper">
+
+    <!-- ── TAB 1: CURATED PORTFOLIO & SOCIAL HUB ── -->
+    <section class="studio-pane active" id="galleryPane">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            Textile Print Collections
+          </h2>
+          <p>Hand-crafted seamless vector patterns ready for licensing, custom recoloring, or interactive synthesis.</p>
+        </div>
+        <!-- Category Filters -->
+        <div class="gallery-filters">
+          <button class="filter-pill active" data-filter="all">All Designs</button>
+          <button class="filter-pill" data-filter="resort">Resort Wear</button>
+          <button class="filter-pill" data-filter="fashion">Fashion Apparel</button>
+          <button class="filter-pill" data-filter="commercial">Commercial Art</button>
+          <button class="filter-pill" data-filter="textile">Textile Art</button>
+        </div>
+      </div>
+
+      <!-- Gallery Grid -->
+      <div class="gallery-grid" id="galleryGrid">
+        <!-- Rendered dynamically by bundle.js -->
+      </div>
+    </section>
+
+    <!-- ── TAB 2: IN-APP PINTEREST FEED & PIN IMPORTER ── -->
+    <section class="studio-pane" id="pinterestPane">
+      <div class="social-hub-hero">
+        <div class="social-hub-meta">
+          <div class="social-hub-avatar">
+            <img src="./assets/atd-logo.jpg" alt="ROMATEXTILEART Official ATD Logo" style="width:100%; height:100%; border-radius:50%; object-fit:cover;" />
+          </div>
+          <div>
+            <h3 style="font-size:1.3rem; font-weight:800; color:#fff;">Pinterest / @romatextileart</h3>
+            <p style="font-size:0.82rem; color:var(--text-muted);">1.8 Million Monthly Views · Trending Apparel & Seamless Surface Patterns</p>
+          </div>
+        </div>
+        <div class="url-importer-bar">
+          <input type="text" id="inputPinterestUrl" placeholder="Paste Pinterest Pin image URL or link to import directly into studio..." />
+          <button class="btn btn-gold" id="btnImportPinterest" style="padding:6px 14px; font-size:0.8rem; flex-shrink:0;">
+            Import Pin
+          </button>
+        </div>
+      </div>
+
+      <!-- Sync Banner & Local Folder Access -->
+      <div class="social-hub-banner" style="background:rgba(212,175,55,0.06); border:1px solid rgba(212,175,55,0.22); border-radius:12px; padding:12px 18px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px;">
+          <span style="background:#e60023; color:#fff; width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1.1rem;">P</span>
+          <div>
+            <div style="font-weight:700; color:#fff; font-size:0.95rem;">@romatextileart Full Pinterest Library (120+ Active Pins Synced)</div>
+            <div style="font-size:0.75rem; color:var(--text-muted);">Synced across all your boards: Marble, Seamless, Geometry, Floral, Damask & Apparel</div>
+          </div>
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <label class="btn btn-gold" style="padding:7px 16px; font-size:0.82rem; cursor:pointer; display:flex; align-items:center; gap:8px;">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+            <span>📁 Load Local Folder (Downloads / PATTERNS)</span>
+            <input type="file" id="btnFolderImport" webkitdirectory directory multiple style="display:none;" />
+          </label>
+          <a href="https://www.pinterest.com/romatextileart/" target="_blank" class="btn btn-outline" style="padding:7px 14px; font-size:0.82rem; display:flex; align-items:center; gap:6px;">
+            <span>Pinterest Web Profile</span>
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+      </div>
+
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h3 style="font-size:1.2rem; color:var(--gold-light);">Your Pinterest Boards (@romatextileart)</h3>
+          <p>Select any board to browse pins or use in Fusion Studio, 3 Colorways, or 3D Shirt Mockup:</p>
+        </div>
+        <div class="gallery-filters" id="pinterestBoardFilters" style="flex-wrap:wrap; gap:6px;">
+          <button class="filter-pill active" data-pin-board="all">All Pins (400+)</button>
+          <button class="filter-pill" data-pin-board="Luxury Marble and Fluid Art">Luxury Marble & Fluid</button>
+          <button class="filter-pill" data-pin-board="ART">ART</button>
+          <button class="filter-pill" data-pin-board="Digital Textile Trends">Textile Trends & Mood</button>
+          <button class="filter-pill" data-pin-board="Magazine">Magazine</button>
+          <button class="filter-pill" data-pin-board="Seamless Patterns">Seamless Patterns</button>
+          <button class="filter-pill" data-pin-board="Creative Concept">Creative Concepts</button>
+          <button class="filter-pill" data-pin-board="Textile & Surface Design">Surface Design</button>
+          <button class="filter-pill" data-pin-board="Pants and Bottomwear">Bottomwear Prints</button>
+          <button class="filter-pill" data-pin-board="Mens and Womens Shirt">Mens/Womens Shirts</button>
+          <button class="filter-pill" data-pin-board="Abstract Art">Abstract Art</button>
+          <button class="filter-pill" data-pin-board="Modern Geometry">Modern Geometry</button>
+          <button class="filter-pill" data-pin-board="AI Generative Art">AI Generative Art</button>
+          <button class="filter-pill" data-pin-board="Ethnic Paisley">Ethnic Paisley</button>
+          <button class="filter-pill" data-pin-board="Color palette">Color Palettes</button>
+          <button class="filter-pill" data-pin-board="Vector Graphic">Vector Graphic Elements</button>
+          <button class="filter-pill" data-pin-board="Floral and Botanical">Floral & Botanical</button>
+          <button class="filter-pill" data-pin-board="Digital All-Over Shirt">All-Over Shirt Prints</button>
+          <button class="filter-pill" data-pin-board="African and Global Tribal">African & Global Tribal</button>
+          <button class="filter-pill" data-pin-board="Baroque and Royal">Baroque & Royal</button>
+          <button class="filter-pill" data-pin-board="Ethereal and Ambient">Ethereal & Ambient</button>
+          <button class="filter-pill" data-pin-board="Alcohol Ink">Alcohol Ink</button>
+          <button class="filter-pill" data-pin-board="Black & White">Black & White</button>
+          <button class="filter-pill" data-pin-board="Watercolor">Watercolor</button>
+        </div>
+      </div>
+
+      <!-- Pinterest Pin Masonry -->
+      <div class="pin-masonry" id="pinterestGrid">
+        <!-- Injected dynamically -->
+      </div>
+      <div style="text-align:center; margin:24px 0;" id="pinterestPagination">
+        <button class="btn btn-outline" id="btnLoadMorePins" style="padding:8px 24px;">Load More Pins ⬇</button>
+      </div>
+    </section>
+
+    <!-- ── TAB 3: IN-APP INSTAGRAM SHOWCASE ── -->
+    <section class="studio-pane" id="instagramPane">
+      <div class="social-hub-hero">
+        <div class="social-hub-meta">
+          <div class="social-hub-avatar" style="border-color:#e1306c;">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="#e1306c"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+          </div>
+          <div>
+            <h3 style="font-size:1.3rem; font-weight:800; color:#fff;">Instagram / @romatextileart</h3>
+            <p style="font-size:0.82rem; color:var(--text-muted);">Designer Studio Atelier, Colorway Drops & Textile Process</p>
+          </div>
+        </div>
+        <div>
+          <a href="https://www.instagram.com/romatextileart" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="border-color:#e1306c; color:#ff78ad;">
+            Visit Instagram Profile ↗
+          </a>
+        </div>
+      </div>
+
+      <!-- Instagram Grid -->
+      <div class="insta-grid" id="instagramGrid">
+        <!-- Injected dynamically -->
+      </div>
+    </section>
+
+    <!-- ── TAB 5: 2-DESIGN AI FUSION STUDIO ── -->
+    <section class="studio-pane" id="fusionPane">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="8" cy="12" r="5"/><circle cx="16" cy="12" r="5"/></svg>
+            2-Design Fusion Studio
+          </h2>
+          <p>Select any 2 textile patterns (from Pinterest, Shutterstock, or custom upload) to synthesize a brand new hybrid artwork.</p>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Controls Sidebar -->
+        <div class="controls-card">
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="2"/></svg>
+              Selected Artwork Sources
+            </div>
+            <div class="fusion-slots">
+              <!-- Slot A -->
+              <div class="slot-box" id="slotA" title="Click to upload custom design A">
+                <span class="slot-badge">SLOT A</span>
+                <img class="slot-thumb" id="slotAThumb" src="" alt="Design A" />
+                <span class="slot-title" id="slotATitle">Design A</span>
+                <span class="slot-hint">Click to Upload File</span>
+                <div style="display:flex; gap:4px; margin-top:8px; width:100%;">
+                  <button type="button" class="card-btn" style="flex:1; padding:5px 8px; font-size:0.75rem;" data-open-picker="A" data-source="pinterest">📌 Pick from Pinterest Boards</button>
+                </div>
+              </div>
+              <!-- Slot B -->
+              <div class="slot-box" id="slotB" title="Click to upload custom design B">
+                <span class="slot-badge">SLOT B</span>
+                <img class="slot-thumb" id="slotBThumb" src="" alt="Design B" />
+                <span class="slot-title" id="slotBTitle">Design B</span>
+                <span class="slot-hint">Click to Upload File</span>
+                <div style="display:flex; gap:4px; margin-top:8px; width:100%;">
+                  <button type="button" class="card-btn" style="flex:1; padding:5px 8px; font-size:0.75rem;" data-open-picker="B" data-source="pinterest">📌 Pick from Pinterest Boards</button>
+                </div>
+              </div>
+            </div>
+            <input type="file" id="uploadA" accept="image/*" style="display:none" />
+            <input type="file" id="uploadB" accept="image/*" style="display:none" />
+          </div>
+
+          <!-- Fusion Mode Selector -->
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              Synthesis Blend Mode
+            </div>
+            <div class="options-stack">
+              <label class="radio-card active">
+                <input type="radio" name="fusionMode" value="botanical-mask" checked />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Organic Silhouette Mask</span>
+                  <span class="radio-card-desc">Design A creates organic motifs filled with Design B</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="fusionMode" value="double-exposure" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Double Exposure Harmonic</span>
+                  <span class="radio-card-desc">Soft luminous multi-exposure textile overlay</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="fusionMode" value="diagonal-split" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Diagonal Atelier Split</span>
+                  <span class="radio-card-desc">Modern asymmetric split seam with gold hairline</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="fusionMode" value="frequency-merge" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Line-Art & Palette Merge</span>
+                  <span class="radio-card-desc">Structure lines of A + tonal depth of B</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="fusionMode" value="kaleidoscope-hybrid" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Radial Kaleidoscope Interlace</span>
+                  <span class="radio-card-desc">4-way symmetrical interlocking hybrid</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Ratio Balance Slider -->
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <span>Design A vs B Balance</span>
+              <span class="val" id="fusionBalanceVal">50%</span>
+            </div>
+            <input type="range" class="custom-range" id="fusionBalance" min="0" max="1" step="0.05" value="0.5" />
+          </div>
+
+          <!-- Action Buttons -->
+          <button class="btn btn-gold" id="btnGenerateFusion" style="width:100%;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 11-2.12-9.36L23 10"/></svg>
+            Fuse & Synthesize Art
+          </button>
+        </div>
+
+        <!-- Fusion Viewport -->
+        <div class="viewport-card">
+          <div class="viewport-toolbar">
+            <div class="viewport-tag">
+              <span class="badge-pronoun" style="background:var(--gold-glow); color:var(--gold-light);">SYNTHESIS ACTIVE</span>
+              <span>1024 × 1024 High-Res Hybrid Tile</span>
+            </div>
+            <div class="viewport-actions">
+              <button class="btn btn-outline" id="btnFusionToRepeat" title="Open in 3 Colorways & Repeat Studio">
+                3 Colorways & Repeat
+              </button>
+              <button class="btn btn-gold" id="btnFusionToMockup" title="Send to Apparel Mockup">
+                Drape on Shirt Mockup
+              </button>
+              <button class="btn btn-accent" id="btnDownloadFusion" title="Download Pattern PNG">
+                Download PNG
+              </button>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="fusionCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB 3: 3 COLORWAYS & SEAMLESS REPEAT STUDIO ── -->
+    <section class="studio-pane" id="repeatPane">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>
+            3 Curated Colorways & Seamless Repeat Engine
+          </h2>
+          <p>Switch between the 3 Best-to-Best commercial textile color palettes with instant seamless repeat modes (Half-Drop, Grid, Brick, Mirror).</p>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Controls Sidebar -->
+        <div class="controls-card">
+          <!-- 3 Best-to-Best Colorways Options -->
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0110 10c0 5.52-4.48 10-10 10"/></svg>
+              3 Curated Colorways (OPN 1, 2, 3)
+            </div>
+            <div class="colorways-grid" id="colorwaysList">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Seamless Repeat Mode -->
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg>
+              Repeat Layout Mode
+            </div>
+            <div class="options-stack">
+              <label class="radio-card active">
+                <input type="radio" name="repeatMode" value="half-drop" checked />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Half-Drop Repeat (Textile Standard)</span>
+                  <span class="radio-card-desc">Columns shifted vertically by 50% for seamless apparel flow</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="repeatMode" value="grid" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Straight Grid (1:1)</span>
+                  <span class="radio-card-desc">Standard uniform square alignment</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="repeatMode" value="brick" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Brick Horizontal Shift (50%)</span>
+                  <span class="radio-card-desc">Rows offset horizontally like traditional masonry</span>
+                </div>
+              </label>
+              <label class="radio-card">
+                <input type="radio" name="repeatMode" value="mirror" />
+                <div class="radio-card-info">
+                  <span class="radio-card-title">Mirror / Kaleidoscope Repeat</span>
+                  <span class="radio-card-desc">Alternating flipped tiles for ornate symmetry</span>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Scale / Zoom Slider -->
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <span>Repeat Tile Scale</span>
+              <span class="val" id="repeatScaleVal">0.50x</span>
+            </div>
+            <input type="range" class="custom-range" id="repeatScale" min="0.2" max="1.5" step="0.05" value="0.5" />
+          </div>
+
+          <!-- Actions -->
+          <button class="btn btn-gold" id="btnRepeatToMockup" style="width:100%;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a2 2 0 001.98 1.67H6v10a2 2 0 002 2h8a2 2 0 002-2V10.83h1.16a2 2 0 001.98-1.67l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+            Drape This Colorway on Shirt
+          </button>
+        </div>
+
+        <!-- Repeat Viewport -->
+        <div class="viewport-card">
+          <div class="viewport-toolbar">
+            <div class="viewport-tag">
+              <span class="badge-pronoun" style="background:var(--gold-glow); color:var(--gold-light);">SEAMLESS REPEAT</span>
+              <span>Full Fabric Surface Simulation</span>
+            </div>
+            <div class="viewport-actions">
+              <button class="btn btn-accent" id="btnDownloadTile">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                Download 2048px Seamless Tile PNG
+              </button>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="repeatCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ── TAB 4: REALISTIC APPAREL SHIRT MOCKUP STUDIO ── -->
+    <section class="studio-pane" id="mockupPane">
+      <div class="section-header">
+        <div class="section-title-wrap">
+          <h2>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.38 3.46L16 2a4 4 0 01-8 0L3.62 3.46a2 2 0 00-1.34 2.23l.58 3.47a2 2 0 001.98 1.67H6v10a2 2 0 002 2h8a2 2 0 002-2V10.83h1.16a2 2 0 001.98-1.67l.58-3.47a2 2 0 00-1.34-2.23z"/></svg>
+            Realistic Apparel Shirt Mockup Studio
+          </h2>
+          <p>Drape any active design, hybrid fusion, or curated colorway onto a luxury tailored resort shirt with authentic fabric folds, collar, and pearl buttons.</p>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <!-- Controls Sidebar -->
+        <div class="controls-card">
+          <!-- Fabric Weave Selection -->
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M2 12h20"/></svg>
+              Fabric Substrate
+            </div>
+            <div class="mockup-controls-grid">
+              <div class="fabric-chip active" data-fabric="linen">Raw Linen Weave</div>
+              <div class="fabric-chip" data-fabric="silk">Silk Twill / Satin</div>
+              <div class="fabric-chip" data-fabric="cotton">Cotton Canvas</div>
+            </div>
+          </div>
+
+          <!-- Pattern Scale on Shirt -->
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <span>Pattern Scale on Shirt</span>
+              <span class="val" id="mockupScaleVal">35%</span>
+            </div>
+            <input type="range" class="custom-range" id="mockupScale" min="0.12" max="0.9" step="0.02" value="0.35" />
+          </div>
+
+          <!-- Pattern Rotation -->
+          <div class="slider-group">
+            <div class="slider-label-row">
+              <span>Pattern Rotation Angle</span>
+              <span class="val" id="mockupRotationVal">0°</span>
+            </div>
+            <input type="range" class="custom-range" id="mockupRotation" min="0" max="360" step="5" value="0" />
+          </div>
+
+          <!-- Photorealistic Layer Toggles -->
+          <div>
+            <div class="card-subtitle">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              Photorealistic Layers
+            </div>
+            <div class="options-stack">
+              <div class="toggle-row">
+                <span>Natural Fold Shadows & Creases</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggleShadows" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <span>Cloth Sheen & Specular Lighting</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggleHighlights" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+              <div class="toggle-row">
+                <span>Mother-of-Pearl Buttons & Seams</span>
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggleButtons" checked />
+                  <span class="toggle-slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Download Action -->
+          <button class="btn btn-gold" id="btnDownloadMockup" style="width:100%;">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download High-Res Shirt Mockup PNG
+          </button>
+        </div>
+
+        <!-- Mockup Viewport -->
+        <div class="viewport-card">
+          <div class="viewport-toolbar">
+            <div class="viewport-tag">
+              <span class="badge-pronoun" style="background:var(--gold-glow); color:var(--gold-light);">PHOTO-DRAPE ENGINE</span>
+              <span>Drag on shirt to reposition print placement</span>
+            </div>
+            <div class="viewport-actions">
+              <span style="font-size:0.75rem; color:var(--text-dim);">Interactive Drag Enabled</span>
+            </div>
+          </div>
+          <div class="canvas-container">
+            <canvas id="mockupCanvas"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ════════════ LICENSING & INQUIRY MODAL ════════════ -->
+  <div class="modal-backdrop" id="quoteModal">
+    <div class="modal-card">
+      <button class="modal-close" id="btnCloseQuote">&times;</button>
+      <h3 class="modal-title">Commercial Licensing & Custom Repeat</h3>
+      <p class="modal-desc">Inquire about exclusive or non-exclusive surface pattern licensing, custom colorways, or bespoke apparel collection development.</p>
+      
+      <form id="quoteForm">
+        <div class="form-group">
+          <label>Full Name / Brand Name</label>
+          <input type="text" class="form-input" placeholder="e.g. Studio Zara / Artisan Wear" required />
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" class="form-input" placeholder="you@brand.com" required />
+        </div>
+        <div class="form-group">
+          <label>Inquiry Type</label>
+          <select class="form-input">
+            <option>Commercial Apparel Licensing</option>
+            <option>Custom Bespoke Textile Collection</option>
+            <option>Colorway Development (OPN 1, 2, 3)</option>
+            <option>Shutterstock / Pinterest Extended Rights</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Project Details / Quantity</label>
+          <textarea class="form-input" rows="3" placeholder="Describe the collection, target launch date, and apparel categories..."></textarea>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width:100%; margin-top:8px;">
+          Submit Inquiry to ROMATEXTILEART
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ════════════ FOOTER ════════════ -->
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <div class="footer-brand">
+        <strong style="color:var(--gold-light); letter-spacing:0.05em;">ROMATEXTILEART · ARTEXDES</strong>
+        <span class="footer-copy">Surface Pattern Designer & Textile Artist — Official Atelier & Licensing Hub</span>
+      </div>
+      <div class="social-channels">
+        <a href="https://www.pinterest.com/romatextileart" target="_blank" rel="noopener noreferrer" class="social-pill pinterest">Pinterest</a>
+        <a href="https://www.shutterstock.com/g/romatextileart" target="_blank" rel="noopener noreferrer" class="social-pill shutterstock">Shutterstock</a>
+        <a href="https://www.instagram.com/romatextileart" target="_blank" rel="noopener noreferrer" class="social-pill instagram">Instagram</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ════════════ QUICK DESIGN PICKER MODAL (PINTEREST / SHUTTERSTOCK) ════════════ -->
+  <div class="quick-picker-modal" id="quickPickerModal">
+    <div class="quick-picker-content">
+      <div class="quick-picker-header">
+        <div>
+          <h3 id="quickPickerTitle" style="font-size:1.25rem; font-weight:700; color:var(--gold-light);">Select Artwork from Pinterest</h3>
+          <p id="quickPickerSubtitle" style="font-size:0.8rem; color:var(--text-muted);">Choose a design to assign directly to Slot A or Slot B</p>
+        </div>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <input type="text" id="quickPickerSearch" placeholder="Search by board or print..." style="background:rgba(0,0,0,0.6); border:1px solid var(--border-gold); color:#fff; padding:6px 14px; border-radius:20px; font-size:0.82rem; width:240px; outline:none;" />
+          <button class="modal-close" id="btnClosePicker">&times;</button>
+        </div>
+      </div>
+      <div class="quick-picker-grid" id="quickPickerGrid">
+        <!-- Rendered dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- Real Designs Data & Standalone Studio Script -->
+  <script src="./real_designs_data.js"></script>
+  <script src="./bundle.js"></script>
+</body>
+</html>

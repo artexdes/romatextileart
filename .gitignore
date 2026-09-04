@@ -1,0 +1,10 @@
+romatextileart-cloudflare-deploy.zip
+*.tmp
+__pycache__/
+.DS_Store
+Thumbs.db
+*.secret
+.env
+auto_deploy_cloudflare.py
+deploy.py
+deploy.bat
