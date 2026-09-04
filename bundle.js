@@ -1456,6 +1456,7 @@ function preloadPatternCanvases() {
     return {
       id: item.id,
       title: item.title,
+      board: item.board,
       collection: item.collection,
       category: item.category,
       source: item.source,
@@ -2195,16 +2196,21 @@ function setupPinterestHub() {
 
     const isAll = boardFilter === 'all' || boardFilter === 'All Pins';
     if (!isAll) {
-      const bf = boardFilter.toLowerCase();
-      filtered = filtered.filter(p => 
-        (p.board && p.board.toLowerCase().includes(bf)) || 
-        (p.collection && p.collection.toLowerCase().includes(bf)) || 
-        (p.category && p.category.toLowerCase().includes(bf)) ||
-        (p.title && p.title.toLowerCase().includes(bf))
-      );
+      const bf = boardFilter.toLowerCase().trim();
+      filtered = filtered.filter(p => {
+        if (!p.board) return false;
+        const pb = p.board.toLowerCase().trim();
+        return pb === bf || pb.includes(bf) || bf.includes(pb);
+      });
       if (filtered.length === 0) {
-        // Fallback so grid is never empty when clicking newly added boards
-        filtered = state.patterns.slice(0, 16);
+        pinContainer.innerHTML = `
+          <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: var(--gold-light);">
+            <p style="font-size: 1.15rem; font-weight: 600; margin-bottom: 8px;">No designs found in folder "${boardFilter}"</p>
+            <p style="font-size: 0.85rem; color: var(--text-muted);"><a href="${getBoardPinterestUrl(boardFilter)}" target="_blank" rel="noopener noreferrer" style="color: #e60023; text-decoration: underline; font-weight: 700;">Open this folder directly on Pinterest ↗</a></p>
+          </div>
+        `;
+        if (btnLoadMore) btnLoadMore.style.display = 'none';
+        return;
       }
     }
 
