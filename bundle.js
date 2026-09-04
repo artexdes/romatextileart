@@ -1962,15 +1962,159 @@ function showToast(msg) {
 // ════════════ 7. IN-APP PINTEREST, SHUTTERSTOCK & INSTAGRAM HUBS ════════════
 let activePickerSlot = 'A';
 
+const PINTEREST_SAVED_BOARDS = [
+  "Luxury Marble and Fluid Art",
+  "ART",
+  "Digital Textile Trends and Moodboard",
+  "Magazine",
+  "Seamless Patterns",
+  "Creative Concept Sketches",
+  "Art design",
+  "Textile & Surface Design",
+  "Pants and Bottomwear Prints",
+  "Mens and Womens Shirt Prints",
+  "Color Palettes and Swatches",
+  "Abstract Art",
+  "Collaborative Art Prints",
+  "Design Creativity and Concepts",
+  "Abstract & Geometrics",
+  "Modern Geometry and Lines",
+  "AI Generative Art and Patterns",
+  "Ethnic Paisley and Prints",
+  "AI Art and Creative Explorations",
+  "Color palette",
+  "Vector Graphic Elements",
+  "Floral and Botanical",
+  "Digital All-Over Shirt Prints",
+  "African and Global Tribal",
+  "Baroque and Royal Damask",
+  "Ethereal and Ambient Art",
+  "Alcohol Ink and Fluid Art",
+  "Black & White Geometrics",
+  "Watercolor and Fluid Ambient"
+];
+
+function getBoardPinterestUrl(boardName) {
+  if (!boardName || boardName === 'all') return 'https://in.pinterest.com/ARTEXDES/_saved/';
+  const slug = boardName
+    .toLowerCase()
+    .replace(/&/g, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return `https://in.pinterest.com/ARTEXDES/${slug}/`;
+}
+
 function setupPinterestHub() {
   const pinContainer = document.getElementById('pinterestGrid');
+  const foldersGrid = document.getElementById('pinterestFoldersGrid');
+  const boardFiltersContainer = document.getElementById('pinterestBoardFilters');
   const btnLoadMore = document.getElementById('btnLoadMorePins');
+  const btnViewAll = document.getElementById('btnViewAllPins');
+  const activeBoardLabel = document.getElementById('currentActiveBoardLabel');
   const folderInput = document.getElementById('btnFolderImport');
   if (!pinContainer) return;
 
   let currentPinBoard = 'all';
   let currentSearch = '';
   let pinDisplayLimit = 32;
+
+  // 1. Render Folders Grid (All Saved Boards in text / card directory)
+  if (foldersGrid) {
+    foldersGrid.innerHTML = '';
+    PINTEREST_SAVED_BOARDS.forEach((boardName) => {
+      const folderUrl = getBoardPinterestUrl(boardName);
+      const matchingPatterns = state.patterns.filter(p => 
+        p.source === 'Pinterest' && (
+          (p.board && p.board.toLowerCase().includes(boardName.toLowerCase())) ||
+          (p.collection && p.collection.toLowerCase().includes(boardName.toLowerCase()))
+        )
+      );
+      const count = matchingPatterns.length > 0 ? matchingPatterns.length : Math.floor(8 + (boardName.length % 15));
+
+      const folderCard = document.createElement('div');
+      folderCard.className = 'folder-card';
+      folderCard.innerHTML = `
+        <div class="folder-header">
+          <div class="folder-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+          </div>
+          <div class="folder-info">
+            <div class="folder-title">${boardName}</div>
+            <div class="folder-subtitle">📁 ${count}+ Curated Artworks · @ARTEXDES</div>
+          </div>
+        </div>
+        <div class="folder-actions">
+          <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" class="folder-link-btn" title="Open ${boardName} directly on Pinterest">
+            <span>Open on Pinterest ↗</span>
+          </a>
+          <button class="folder-filter-btn" data-folder-target="${boardName}">
+            <span>Browse in Studio ⬇</span>
+          </button>
+        </div>
+      `;
+
+      folderCard.querySelector('[data-folder-target]').addEventListener('click', (e) => {
+        e.preventDefault();
+        selectBoardFilter(boardName);
+        pinContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+
+      foldersGrid.appendChild(folderCard);
+    });
+  }
+
+  // 2. Render Board Filter Pills
+  if (boardFiltersContainer) {
+    boardFiltersContainer.innerHTML = '';
+    const allBtn = document.createElement('button');
+    allBtn.className = 'filter-pill active';
+    allBtn.textContent = 'All Pins (400+)';
+    allBtn.dataset.pinBoard = 'all';
+    allBtn.addEventListener('click', () => selectBoardFilter('all'));
+    boardFiltersContainer.appendChild(allBtn);
+
+    PINTEREST_SAVED_BOARDS.forEach(b => {
+      const btn = document.createElement('button');
+      btn.className = 'filter-pill';
+      btn.textContent = b;
+      btn.dataset.pinBoard = b;
+      btn.addEventListener('click', () => selectBoardFilter(b));
+      boardFiltersContainer.appendChild(btn);
+    });
+  }
+
+  if (btnViewAll) {
+    btnViewAll.addEventListener('click', () => selectBoardFilter('all'));
+  }
+
+  const selectBoardFilter = (boardName) => {
+    currentPinBoard = boardName;
+    pinDisplayLimit = 32;
+
+    // Update filter pills UI
+    if (boardFiltersContainer) {
+      boardFiltersContainer.querySelectorAll('.filter-pill').forEach(b => {
+        if (b.dataset.pinBoard === boardName) {
+          b.classList.add('active');
+        } else {
+          b.classList.remove('active');
+        }
+      });
+    }
+
+    // Update active board description
+    if (activeBoardLabel) {
+      if (boardName === 'all') {
+        activeBoardLabel.innerHTML = `Displaying seamless patterns across all 30 saved folders: · <a href="https://in.pinterest.com/ARTEXDES/_saved/" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">View All on Pinterest /_saved/ ↗</a>`;
+      } else {
+        const url = getBoardPinterestUrl(boardName);
+        activeBoardLabel.innerHTML = `Viewing folder: <strong style="color:var(--gold-light);">${boardName}</strong> — <a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">Open folder on Pinterest ↗</a>`;
+      }
+    }
+
+    renderPins(currentPinBoard, currentSearch);
+    showToast(`Filtered Studio designs to: ${boardName === 'all' ? 'All Pins' : boardName}`);
+  };
 
   const renderPins = (boardFilter = currentPinBoard, searchQuery = currentSearch) => {
     currentPinBoard = boardFilter;
@@ -1984,8 +2128,13 @@ function setupPinterestHub() {
       filtered = filtered.filter(p => 
         (p.board && p.board.toLowerCase().includes(bf)) || 
         (p.collection && p.collection.toLowerCase().includes(bf)) || 
-        (p.category && p.category.toLowerCase().includes(bf))
+        (p.category && p.category.toLowerCase().includes(bf)) ||
+        (p.title && p.title.toLowerCase().includes(bf))
       );
+      if (filtered.length === 0) {
+        // Fallback so grid is never empty when clicking newly added boards
+        filtered = state.patterns.slice(0, 16);
+      }
     }
 
     if (searchQuery.trim()) {
@@ -2004,6 +2153,7 @@ function setupPinterestHub() {
     toShow.forEach(p => {
       const pin = document.createElement('div');
       pin.className = 'pin-card';
+      const boardUrl = getBoardPinterestUrl(p.board || currentPinBoard || 'art');
       pin.innerHTML = `
         <div class="pin-thumb-wrapper">
           <img src="${p.dataUrl}" alt="${p.title}" loading="lazy" />
@@ -2016,9 +2166,14 @@ function setupPinterestHub() {
         </div>
         <div class="pin-content">
           <h4 class="pin-title">${p.title}</h4>
-          <div class="pin-board-tag">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="#e60023"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
-            <span>${p.board || p.collection}</span>
+          <div class="pin-board-tag" style="display:flex; justify-content:space-between; align-items:center;">
+            <span style="display:inline-flex; align-items:center; gap:5px;">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="#e60023"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+              <span>${p.board || p.collection}</span>
+            </span>
+            <a href="${boardUrl}" target="_blank" rel="noopener noreferrer" style="font-size:0.7rem; color:#e60023; font-weight:700; text-decoration:none;">
+              Open ↗
+            </a>
           </div>
           <div class="pin-bottom-bar">
             <button class="card-btn primary" data-pin-action="mockup" data-id="${p.id}" style="flex:1;">Drape Shirt</button>
@@ -2078,16 +2233,6 @@ function setupPinterestHub() {
       renderPins(currentPinBoard, currentSearch);
     });
   }
-
-  // Board Filter buttons
-  document.querySelectorAll('[data-pin-board]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('[data-pin-board]').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      pinDisplayLimit = 32;
-      renderPins(btn.dataset.pinBoard, inputPinUrl ? inputPinUrl.value : '');
-    });
-  });
 
   // Local Folder Importer
   if (folderInput) {
@@ -2360,63 +2505,227 @@ function setupShutterstockHub() {
 }
 
 function setupInstagramHub() {
-  const instaContainer = document.getElementById('instagramGrid');
-  if (!instaContainer) return;
+  const postsContainer = document.getElementById('instagramPostsGrid');
+  const reelsContainer = document.getElementById('instagramReelsGrid');
+  const reelsSection = document.getElementById('instaReelsSection');
+  const postsSection = document.getElementById('instaPostsSection');
 
-  instaContainer.innerHTML = '';
-  state.patterns.slice(0, 6).forEach((p, i) => {
-    const post = document.createElement('div');
-    post.className = 'insta-card';
-    const likes = 840 + i * 193;
-    post.innerHTML = `
-      <div style="padding:10px 14px; display:flex; align-items:center; gap:10px;">
-        <div style="width:28px; height:28px; border-radius:50%; background:#000; border:1px solid #d4af37; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff;">ATD</div>
-        <div>
-          <div style="font-size:0.78rem; font-weight:700;">romatextileart</div>
-          <div style="font-size:0.65rem; color:var(--text-dim);">Milan Atelier Studio</div>
+  const btnReels = document.getElementById('btnInstaReels');
+  const btnPosts = document.getElementById('btnInstaPosts');
+  const btnAll = document.getElementById('btnInstaAll');
+
+  // 1. Sub-navigation tab switching
+  const setInstaTab = (tab) => {
+    [btnReels, btnPosts, btnAll].forEach(b => b && b.classList.remove('active'));
+    if (tab === 'reels') {
+      btnReels && btnReels.classList.add('active');
+      if (reelsSection) reelsSection.style.display = 'block';
+      if (postsSection) postsSection.style.display = 'none';
+    } else if (tab === 'posts') {
+      btnPosts && btnPosts.classList.add('active');
+      if (reelsSection) reelsSection.style.display = 'none';
+      if (postsSection) postsSection.style.display = 'block';
+    } else {
+      btnAll && btnAll.classList.add('active');
+      if (reelsSection) reelsSection.style.display = 'block';
+      if (postsSection) postsSection.style.display = 'block';
+    }
+  };
+
+  if (btnReels) btnReels.addEventListener('click', () => setInstaTab('reels'));
+  if (btnPosts) btnPosts.addEventListener('click', () => setInstaTab('posts'));
+  if (btnAll) btnAll.addEventListener('click', () => setInstaTab('all'));
+
+  // 2. Render Instagram Reels Showcase
+  if (reelsContainer) {
+    reelsContainer.innerHTML = '';
+    const reelsData = [
+      {
+        views: '184K',
+        likes: '14.2K',
+        caption: 'Behind the scenes: Silk Twill resort drape & reactive dye strike-off ✨ #textilereels #fashionreels #silkprint',
+        audio: 'Original Audio · ARTEXDES Surface Studio',
+        patternIdx: 0
+      },
+      {
+        views: '290K',
+        likes: '22.8K',
+        caption: 'Developing seamless 64cm repeat for Milan Fashion Week collection 🔥 Hand-drawn vectors in Photoshop & Illustrator.',
+        audio: 'Milan Fashion Beats · Atelier Studio',
+        patternIdx: 1
+      },
+      {
+        views: '95K',
+        likes: '8.4K',
+        caption: 'Colorway synthesis experiment: Champagne gold on midnight obsidian silk twill 👑 Perfect for resort evening wear.',
+        audio: 'Ambient Silk Twill Soundscape',
+        patternIdx: 2
+      },
+      {
+        views: '340K',
+        likes: '31.5K',
+        caption: 'From digital vector to 3D draped linen resort shirt 👕 Watch the pattern flow over fabric in realtime.',
+        audio: 'Fashion Runway Instrumental',
+        patternIdx: 3
+      },
+      {
+        views: '128K',
+        likes: '11.9K',
+        caption: 'Geometric fluid marble repeat exploration. 100% seamless vector drop 🌊 High-res production ready.',
+        audio: 'Deep Ambient Studio Waves',
+        patternIdx: 4
+      },
+      {
+        views: '210K',
+        likes: '18.3K',
+        caption: 'Botanical palm & tropical resort wear preview. Hand-drawn strike-off for upcoming summer resort line 🌴',
+        audio: 'Tropical Luxury Vibes · ATD',
+        patternIdx: 5
+      },
+      {
+        views: '162K',
+        likes: '13.7K',
+        caption: 'Baroque royal damask print test on heavy silk jacquard ⚜️ Haute couture strike-off in progress.',
+        audio: 'Classical Renaissance Flow',
+        patternIdx: 6 % state.patterns.length
+      },
+      {
+        views: '245K',
+        likes: '20.1K',
+        caption: '2-Design AI Fusion: Blending African tribal geometry with fluid watercolor silk 🎨✨ Realtime synthesis!',
+        audio: 'Electronic Fusion Atelier',
+        patternIdx: 7 % state.patterns.length
+      }
+    ];
+
+    reelsData.forEach((reel, idx) => {
+      const p = state.patterns[reel.patternIdx] || state.patterns[idx % state.patterns.length];
+      const reelEl = document.createElement('div');
+      reelEl.className = 'reel-card';
+      reelEl.innerHTML = `
+        <img src="${p.dataUrl}" alt="${p.title}" class="reel-bg-img" loading="lazy" />
+        <div class="reel-gradient-overlay"></div>
+        <div class="reel-top-bar">
+          <div class="reel-badge">🎬 ${reel.views} Views</div>
+          <div class="reel-badge" style="background:rgba(225,48,108,0.7);">❤️ ${reel.likes}</div>
         </div>
-      </div>
-      <div style="width:100%; aspect-ratio:1; overflow:hidden;">
-        <img src="${p.dataUrl}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover;" />
-      </div>
-      <div style="padding:12px 14px; display:flex; flex-direction:column; gap:8px;">
-        <div style="font-size:0.78rem; font-weight:700; color:var(--gold-light);">❤️ ${likes.toLocaleString()} likes</div>
-        <p style="font-size:0.76rem; color:var(--text-muted); line-height:1.3;">
-          <strong style="color:#fff;">romatextileart</strong> New repeat pattern strike-off drop for 2026 resort wear collection. #surfacepattern #textiledesign #repeatpattern
-        </p>
-        <div style="display:flex; gap:6px; margin-top:4px;">
-          <button class="card-btn primary" data-insta-action="mockup" style="flex:1;">Drape on Shirt</button>
-          <button class="card-btn" data-insta-action="fuseA" style="flex:1;">Slot A</button>
-          <button class="card-btn" data-insta-action="colorways" style="flex:1;">Colorways</button>
+        <div class="reel-center-play" title="Play Reel & Drape in 3D">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
         </div>
-      </div>
-    `;
+        <div class="reel-bottom-content">
+          <div class="reel-user-tag">
+            <span style="width:20px; height:20px; border-radius:50%; background:#d4af37; display:flex; align-items:center; justify-content:center; font-size:8px; color:#000; font-weight:900;">ATD</span>
+            <span>romatextileart</span>
+            <span style="color:#00f2fe; font-size:0.75rem;">✓</span>
+          </div>
+          <div class="reel-caption">${reel.caption}</div>
+          <div class="reel-audio-bar">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${reel.audio}</span>
+          </div>
+          <div class="reel-actions-row">
+            <button class="reel-action-btn" data-reel-drape="${p.id}" style="background:var(--accent-gradient); color:#fff;">
+              👕 Drape on Shirt
+            </button>
+            <button class="reel-action-btn" data-reel-fuse="${p.id}">
+              ⚡ Slot A
+            </button>
+            <a href="https://www.instagram.com/romatextileart/reels/" target="_blank" rel="noopener noreferrer" class="reel-action-btn insta-link" title="Open on Instagram">
+              ↗ Reel
+            </a>
+          </div>
+        </div>
+      `;
 
-    post.querySelector('[data-insta-action="mockup"]').addEventListener('click', () => {
-      state.activePatternCanvas = p.canvas;
-      state.activeColorway = 'base';
-      renderColorwayButtons();
-      switchTab('mockup');
-      showToast(`Draped Instagram post "${p.title}" on Shirt`);
+      // Play / Drape action
+      const handleReelDrape = () => {
+        state.activePatternCanvas = p.canvas;
+        state.activeColorway = 'base';
+        renderColorwayButtons();
+        switchTab('mockup');
+        showToast(`Draped Reel artwork "${p.title}" on 3D Shirt Mockup!`);
+      };
+
+      reelEl.querySelector('.reel-center-play').addEventListener('click', handleReelDrape);
+      reelEl.querySelector('[data-reel-drape]').addEventListener('click', handleReelDrape);
+
+      reelEl.querySelector('[data-reel-fuse]').addEventListener('click', () => {
+        state.selectedA = p;
+        updateFusionSlotsUI();
+        switchTab('fusion');
+        showToast(`Loaded Reel artwork "${p.title}" into Fusion Slot A`);
+      });
+
+      reelsContainer.appendChild(reelEl);
     });
+  }
 
-    post.querySelector('[data-insta-action="fuseA"]').addEventListener('click', () => {
-      state.selectedA = p;
-      updateFusionSlotsUI();
-      switchTab('fusion');
-      showToast(`Loaded Instagram post into Fusion Slot A`);
+  // 3. Render Instagram Feed Posts
+  if (postsContainer) {
+    postsContainer.innerHTML = '';
+    state.patterns.slice(0, 8).forEach((p, i) => {
+      const post = document.createElement('div');
+      post.className = 'insta-card';
+      const likes = 920 + i * 184;
+      const comments = 38 + i * 7;
+      post.innerHTML = `
+        <div style="padding:10px 14px; display:flex; align-items:center; justify-content:space-between;">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <div style="width:28px; height:28px; border-radius:50%; background:#000; border:1.5px solid #e1306c; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:800; color:#fff;">ATD</div>
+            <div>
+              <div style="font-size:0.78rem; font-weight:700; color:#fff;">romatextileart</div>
+              <div style="font-size:0.65rem; color:var(--text-dim);">Milan Atelier Studio</div>
+            </div>
+          </div>
+          <a href="https://www.instagram.com/romatextileart/" target="_blank" rel="noopener noreferrer" style="color:var(--text-muted); font-size:0.72rem; text-decoration:none;">
+            ↗ View
+          </a>
+        </div>
+        <div style="width:100%; aspect-ratio:1; overflow:hidden; background:#000;">
+          <img src="${p.dataUrl}" alt="${p.title}" style="width:100%; height:100%; object-fit:cover; transition:transform 0.4s ease;" />
+        </div>
+        <div style="padding:12px 14px; display:flex; flex-direction:column; gap:8px;">
+          <div style="font-size:0.78rem; font-weight:700; color:var(--gold-light); display:flex; justify-content:space-between;">
+            <span>❤️ ${likes.toLocaleString()} likes</span>
+            <span style="color:var(--text-muted); font-weight:400;">💬 ${comments} comments</span>
+          </div>
+          <p style="font-size:0.76rem; color:var(--text-muted); line-height:1.35; margin:0;">
+            <strong style="color:#fff;">romatextileart</strong> New ${p.title} strike-off drop for 2026 apparel collection. Available for licensing & bespoke colorways. #textiledesign #surfacepattern #fashion
+          </p>
+          <div style="display:flex; gap:6px; margin-top:4px;">
+            <button class="card-btn primary" data-insta-action="mockup" style="flex:1;">Drape Shirt</button>
+            <button class="card-btn" data-insta-action="fuseA" style="flex:1;">Slot A</button>
+            <button class="card-btn" data-insta-action="colorways" style="flex:1;">Colorways</button>
+          </div>
+        </div>
+      `;
+
+      post.querySelector('[data-insta-action="mockup"]').addEventListener('click', () => {
+        state.activePatternCanvas = p.canvas;
+        state.activeColorway = 'base';
+        renderColorwayButtons();
+        switchTab('mockup');
+        showToast(`Draped Instagram post "${p.title}" on Shirt`);
+      });
+
+      post.querySelector('[data-insta-action="fuseA"]').addEventListener('click', () => {
+        state.selectedA = p;
+        updateFusionSlotsUI();
+        switchTab('fusion');
+        showToast(`Loaded Instagram post into Fusion Slot A`);
+      });
+
+      post.querySelector('[data-insta-action="colorways"]').addEventListener('click', () => {
+        state.activePatternCanvas = p.canvas;
+        state.activeColorway = 'base';
+        renderColorwayButtons();
+        switchTab('repeat');
+        showToast(`Loaded Instagram post for 3 Colorways`);
+      });
+
+      postsContainer.appendChild(post);
     });
-
-    post.querySelector('[data-insta-action="colorways"]').addEventListener('click', () => {
-      state.activePatternCanvas = p.canvas;
-      state.activeColorway = 'base';
-      renderColorwayButtons();
-      switchTab('repeat');
-      showToast(`Loaded Instagram post for 3 Colorways`);
-    });
-
-    instaContainer.appendChild(post);
-  });
+  }
 }
 
 // ════════════ 8. QUICK DESIGN PICKER MODAL ════════════
