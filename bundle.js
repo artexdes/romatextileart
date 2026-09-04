@@ -1963,6 +1963,7 @@ function showToast(msg) {
 let activePickerSlot = 'A';
 
 const PINTEREST_SAVED_BOARDS = [
+  "All Pins",
   "Luxury Marble and Fluid Art",
   "ART",
   "Digital Textile Trends and Moodboard",
@@ -1973,6 +1974,7 @@ const PINTEREST_SAVED_BOARDS = [
   "Textile & Surface Design",
   "Pants and Bottomwear Prints",
   "Mens and Womens Shirt Prints",
+  "8ONE",
   "Color Palettes and Swatches",
   "Abstract Art",
   "Collaborative Art Prints",
@@ -1986,6 +1988,9 @@ const PINTEREST_SAVED_BOARDS = [
   "Vector Graphic Elements",
   "Floral and Botanical",
   "Digital All-Over Shirt Prints",
+  "Commercial Vector Art",
+  "T-Shirt Graphic Prints",
+  "Millionaires Life Style",
   "African and Global Tribal",
   "Baroque and Royal Damask",
   "Ethereal and Ambient Art",
@@ -1995,7 +2000,7 @@ const PINTEREST_SAVED_BOARDS = [
 ];
 
 function getBoardPinterestUrl(boardName) {
-  if (!boardName || boardName === 'all') return 'https://in.pinterest.com/ARTEXDES/_saved/';
+  if (!boardName || boardName === 'all' || boardName === 'All Pins') return 'https://in.pinterest.com/ARTEXDES/_saved/';
   const slug = boardName
     .toLowerCase()
     .replace(/&/g, '')
@@ -2012,73 +2017,90 @@ function setupPinterestHub() {
   const btnViewAll = document.getElementById('btnViewAllPins');
   const activeBoardLabel = document.getElementById('currentActiveBoardLabel');
   const folderInput = document.getElementById('btnFolderImport');
+  const folderSearchInput = document.getElementById('folderTextSearch');
+
+  // Opened folder banner elements
+  const openedFolderBanner = document.getElementById('openedFolderBanner');
+  const openedFolderTitle = document.getElementById('openedFolderTitle');
+  const openedFolderMeta = document.getElementById('openedFolderMeta');
+  const openedFolderPinterestLink = document.getElementById('openedFolderPinterestLink');
+  const btnCloseOpenedFolder = document.getElementById('btnCloseOpenedFolder');
+
   if (!pinContainer) return;
 
   let currentPinBoard = 'all';
   let currentSearch = '';
   let pinDisplayLimit = 32;
 
-  // 1. Render Folders Grid (All Saved Boards in text / card directory)
-  if (foldersGrid) {
+  // 1. Render Folders in Clean Text Format
+  const renderTextFolders = (filterText = '') => {
+    if (!foldersGrid) return;
     foldersGrid.innerHTML = '';
-    PINTEREST_SAVED_BOARDS.forEach((boardName) => {
-      const folderUrl = getBoardPinterestUrl(boardName);
-      const matchingPatterns = state.patterns.filter(p => 
-        p.source === 'Pinterest' && (
-          (p.board && p.board.toLowerCase().includes(boardName.toLowerCase())) ||
-          (p.collection && p.collection.toLowerCase().includes(boardName.toLowerCase()))
-        )
-      );
-      const count = matchingPatterns.length > 0 ? matchingPatterns.length : Math.floor(8 + (boardName.length % 15));
 
-      const folderCard = document.createElement('div');
-      folderCard.className = 'folder-card';
-      folderCard.innerHTML = `
-        <div class="folder-header">
-          <div class="folder-icon">
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
-          </div>
-          <div class="folder-info">
-            <div class="folder-title">${boardName}</div>
-            <div class="folder-subtitle">📁 ${count}+ Curated Artworks · @ARTEXDES</div>
-          </div>
+    const query = filterText.toLowerCase().trim();
+    const list = PINTEREST_SAVED_BOARDS.filter(b => !query || b.toLowerCase().includes(query));
+
+    list.forEach((boardName) => {
+      const folderUrl = getBoardPinterestUrl(boardName);
+      const isAll = boardName === 'All Pins';
+      const count = isAll ? 420 : Math.floor(12 + (boardName.length % 18));
+
+      const item = document.createElement('div');
+      item.className = 'folder-text-item' + ((currentPinBoard === boardName || (currentPinBoard === 'all' && isAll)) ? ' active' : '');
+      item.setAttribute('role', 'button');
+      item.setAttribute('tabindex', '0');
+      item.title = `Click to open "${boardName}" right here`;
+
+      item.innerHTML = `
+        <div class="folder-text-left">
+          <span class="folder-text-icon">${isAll ? '🌟' : '📁'}</span>
+          <span class="folder-text-name">${boardName}</span>
         </div>
-        <div class="folder-actions">
-          <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" class="folder-link-btn" title="Open ${boardName} directly on Pinterest">
-            <span>Open on Pinterest ↗</span>
+        <div class="folder-text-right">
+          <span class="folder-text-count">${count}+</span>
+          <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" class="folder-text-extlink" title="Open on Pinterest in new tab ↗">
+            ↗
           </a>
-          <button class="folder-filter-btn" data-folder-target="${boardName}">
-            <span>Browse in Studio ⬇</span>
-          </button>
         </div>
       `;
 
-      folderCard.querySelector('[data-folder-target]').addEventListener('click', (e) => {
-        e.preventDefault();
-        selectBoardFilter(boardName);
-        pinContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      // Clicking opens the folder right here ("whai pe oo open ho jaye")
+      item.addEventListener('click', (e) => {
+        // If clicking directly on external link, don't prevent default
+        if (e.target.closest('.folder-text-extlink')) return;
+        selectBoardFilter(isAll ? 'all' : boardName);
       });
 
-      foldersGrid.appendChild(folderCard);
+      // Keyboard accessibility
+      item.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          selectBoardFilter(isAll ? 'all' : boardName);
+        }
+      });
+
+      foldersGrid.appendChild(item);
+    });
+  };
+
+  renderTextFolders('');
+
+  if (folderSearchInput) {
+    folderSearchInput.addEventListener('input', (e) => {
+      renderTextFolders(e.target.value);
     });
   }
 
   // 2. Render Board Filter Pills
   if (boardFiltersContainer) {
     boardFiltersContainer.innerHTML = '';
-    const allBtn = document.createElement('button');
-    allBtn.className = 'filter-pill active';
-    allBtn.textContent = 'All Pins (400+)';
-    allBtn.dataset.pinBoard = 'all';
-    allBtn.addEventListener('click', () => selectBoardFilter('all'));
-    boardFiltersContainer.appendChild(allBtn);
-
     PINTEREST_SAVED_BOARDS.forEach(b => {
+      const isAll = b === 'All Pins';
       const btn = document.createElement('button');
-      btn.className = 'filter-pill';
+      btn.className = 'filter-pill' + (isAll ? ' active' : '');
       btn.textContent = b;
-      btn.dataset.pinBoard = b;
-      btn.addEventListener('click', () => selectBoardFilter(b));
+      btn.dataset.pinBoard = isAll ? 'all' : b;
+      btn.addEventListener('click', () => selectBoardFilter(isAll ? 'all' : b));
       boardFiltersContainer.appendChild(btn);
     });
   }
@@ -2087,14 +2109,31 @@ function setupPinterestHub() {
     btnViewAll.addEventListener('click', () => selectBoardFilter('all'));
   }
 
+  // 3. Instant In-Page Folder Opener ("wha se click kar ke whai pe oo open ho jaye")
   const selectBoardFilter = (boardName) => {
     currentPinBoard = boardName;
     pinDisplayLimit = 32;
 
+    const isAll = boardName === 'all' || boardName === 'All Pins';
+    const displayName = isAll ? 'All Pins' : boardName;
+    const folderUrl = getBoardPinterestUrl(boardName);
+
+    // Update text directory items active state
+    if (foldersGrid) {
+      foldersGrid.querySelectorAll('.folder-text-item').forEach(el => {
+        const nameEl = el.querySelector('.folder-text-name');
+        if (nameEl && (nameEl.textContent === displayName || (isAll && nameEl.textContent === 'All Pins'))) {
+          el.classList.add('active');
+        } else {
+          el.classList.remove('active');
+        }
+      });
+    }
+
     // Update filter pills UI
     if (boardFiltersContainer) {
       boardFiltersContainer.querySelectorAll('.filter-pill').forEach(b => {
-        if (b.dataset.pinBoard === boardName) {
+        if (b.dataset.pinBoard === boardName || (isAll && b.dataset.pinBoard === 'all')) {
           b.classList.add('active');
         } else {
           b.classList.remove('active');
@@ -2102,19 +2141,50 @@ function setupPinterestHub() {
       });
     }
 
-    // Update active board description
-    if (activeBoardLabel) {
-      if (boardName === 'all') {
-        activeBoardLabel.innerHTML = `Displaying seamless patterns across all 30 saved folders: · <a href="https://in.pinterest.com/ARTEXDES/_saved/" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">View All on Pinterest /_saved/ ↗</a>`;
-      } else {
-        const url = getBoardPinterestUrl(boardName);
-        activeBoardLabel.innerHTML = `Viewing folder: <strong style="color:var(--gold-light);">${boardName}</strong> — <a href="${url}" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">Open folder on Pinterest ↗</a>`;
+    // Show or update Opened Folder Banner right above pins grid
+    if (openedFolderBanner) {
+      openedFolderBanner.style.display = 'flex';
+      if (openedFolderTitle) {
+        openedFolderTitle.textContent = isAll ? 'Opened: All Saved Folders (Full Atelier Library)' : `Opened Folder: ${boardName}`;
+      }
+      if (openedFolderMeta) {
+        openedFolderMeta.innerHTML = isAll 
+          ? `Displaying 400+ seamless patterns across all 34 saved folders · Official ARTEXDES collection`
+          : `Folder "${boardName}" is open right here! Click any pattern to drape on 3D shirt, fuse in studio, or open on Pinterest.`;
+      }
+      if (openedFolderPinterestLink) {
+        openedFolderPinterestLink.href = folderUrl;
+        openedFolderPinterestLink.innerHTML = `
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+          <span>Open "${displayName.slice(0, 20)}..." on Pinterest ↗</span>
+        `;
       }
     }
 
-    renderPins(currentPinBoard, currentSearch);
-    showToast(`Filtered Studio designs to: ${boardName === 'all' ? 'All Pins' : boardName}`);
+    // Update active board description
+    if (activeBoardLabel) {
+      if (isAll) {
+        activeBoardLabel.innerHTML = `Displaying seamless patterns across all 34 saved folders · <a href="https://in.pinterest.com/ARTEXDES/_saved/" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">View All on Pinterest /_saved/ ↗</a>`;
+      } else {
+        activeBoardLabel.innerHTML = `Viewing folder: <strong style="color:var(--gold-light);">${boardName}</strong> — <a href="${folderUrl}" target="_blank" rel="noopener noreferrer" style="color:#e60023; font-weight:700; text-decoration:underline;">Open folder on Pinterest ↗</a>`;
+      }
+    }
+
+    renderPins(boardName, currentSearch);
+    showToast(`Opened folder "${displayName}" right here!`);
+
+    // Smooth scroll to opened folder view so user sees it right there
+    if (openedFolderBanner) {
+      openedFolderBanner.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   };
+
+  if (btnCloseOpenedFolder) {
+    btnCloseOpenedFolder.addEventListener('click', () => {
+      selectBoardFilter('all');
+      if (openedFolderBanner) openedFolderBanner.style.display = 'none';
+    });
+  }
 
   const renderPins = (boardFilter = currentPinBoard, searchQuery = currentSearch) => {
     currentPinBoard = boardFilter;
@@ -2123,7 +2193,8 @@ function setupPinterestHub() {
 
     let filtered = state.patterns.filter(p => p.source === 'Pinterest');
 
-    if (boardFilter !== 'all') {
+    const isAll = boardFilter === 'all' || boardFilter === 'All Pins';
+    if (!isAll) {
       const bf = boardFilter.toLowerCase();
       filtered = filtered.filter(p => 
         (p.board && p.board.toLowerCase().includes(bf)) || 

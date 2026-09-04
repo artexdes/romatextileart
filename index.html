@@ -274,35 +274,56 @@
         </div>
       </div>
 
-      <!-- ── SAVED BOARDS & FOLDERS TEXT DIRECTORY (ALL 30 OPTIONS) ── -->
+      <!-- ── SAVED BOARDS & FOLDERS IN TEXT FORMAT (ALL 34 OPTIONS) ── -->
       <div class="pinterest-folders-directory" id="pinterestFoldersSection">
         <div class="pinterest-folders-top">
           <div>
             <h3 style="font-size:1.15rem; font-weight:800; color:var(--text-main); display:flex; align-items:center; gap:8px;">
-              <span>📁 All Saved Folders & Boards (@ARTEXDES)</span>
-              <span style="font-size:0.75rem; background:rgba(230,0,35,0.12); color:#e60023; font-weight:700; padding:2px 8px; border-radius:10px;">30 Folders</span>
+              <span>📁 All Saved Folders (@ARTEXDES)</span>
+              <span style="font-size:0.75rem; background:rgba(230,0,35,0.12); color:#e60023; font-weight:700; padding:2px 8px; border-radius:10px;">34 Folders</span>
             </h3>
             <p style="font-size:0.8rem; color:var(--text-muted); margin-top:3px;">
-              All saved folders from your Pinterest account. Click <strong>"Open on Pinterest ↗"</strong> to visit any specific folder, or click <strong>"Browse in Studio"</strong> to filter patterns below:
+              Aapke Pinterest account ke sabhi saved folders text format me. Click karte hi wahin pe folder open ho jayega:
             </p>
           </div>
           <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
-            <button class="filter-pill active" id="btnViewAllPins">View All Pins (400+)</button>
+            <input type="text" id="folderTextSearch" placeholder="🔍 Search folder name..." style="padding:6px 14px; font-size:0.78rem; border-radius:20px; border:1px solid rgba(0,0,0,0.12); background:rgba(255,255,255,0.9); outline:none; min-width:170px;" />
+            <button class="filter-pill active" id="btnViewAllPins">View All (400+ Pins)</button>
             <a href="https://in.pinterest.com/ARTEXDES/_saved/" target="_blank" rel="noopener noreferrer" class="btn btn-outline" style="padding:6px 14px; font-size:0.78rem; border-color:#e60023; color:#e60023;">
-              All Saved Folders on Pinterest ↗
+              All on Pinterest ↗
             </a>
           </div>
         </div>
 
-        <div class="pinterest-folders-grid" id="pinterestFoldersGrid">
-          <!-- Populated dynamically with all 30 boards -->
+        <div class="pinterest-text-folders-grid" id="pinterestFoldersGrid">
+          <!-- Populated dynamically with all 34 boards in clean text format -->
+        </div>
+      </div>
+
+      <!-- Active Opened Folder Banner ("whai pe oo open ho jaye") -->
+      <div class="opened-folder-banner" id="openedFolderBanner" style="display:none;">
+        <div class="opened-folder-left">
+          <span class="opened-folder-icon">📂</span>
+          <div>
+            <div class="opened-folder-title" id="openedFolderTitle">Opened Folder: Luxury Marble and Fluid Art</div>
+            <div class="opened-folder-meta" id="openedFolderMeta">All pins from this folder loaded below. You can drape on 3D shirt, fuse 2 prints, or open on Pinterest.</div>
+          </div>
+        </div>
+        <div class="opened-folder-actions">
+          <a href="#" id="openedFolderPinterestLink" target="_blank" rel="noopener noreferrer" class="btn btn-gold" style="padding:7px 16px; font-size:0.8rem; display:inline-flex; align-items:center; gap:6px;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0a12 12 0 00-4.4 23.2c-.1-.9-.2-2.3 0-3.3l1.5-6.3s-.4-.8-.4-1.9c0-1.8 1-3.2 2.4-3.2 1.1 0 1.7.8 1.7 1.9 0 1.1-.7 2.8-1.1 4.4-.3 1.3.7 2.4 2 2.4 2.4 0 4.2-2.5 4.2-6.2 0-3.2-2.3-5.5-5.7-5.5-3.9 0-6.1 2.9-6.1 5.9 0 1.2.5 2.4 1 3.1.1.1.1.3.1.4l-.4 1.6c-.1.3-.2.4-.5.3-2.1-1-3.4-4-3.4-6.4C2.5 6.4 6.7 2.4 12.3 2.4c4.5 0 8 3.2 8 7.5 0 4.5-2.8 8.1-6.7 8.1-1.3 0-2.5-.7-3-1.5l-.8 3.1c-.3 1.1-1.1 2.5-1.6 3.4 1.2.4 2.5.5 3.8.5 6.6 0 12-5.4 12-12S18.6 0 12 0z"/></svg>
+            <span>Open Folder on Pinterest ↗</span>
+          </a>
+          <button class="btn btn-glass" id="btnCloseOpenedFolder" style="padding:7px 14px; font-size:0.8rem;">
+            ✕ Reset / View All
+          </button>
         </div>
       </div>
 
       <!-- Section Title & Quick Filters -->
       <div class="section-header">
         <div class="section-title-wrap">
-          <h3 style="font-size:1.2rem; color:var(--gold-light);">Active Filtered Pins (@ARTEXDES)</h3>
+          <h3 style="font-size:1.2rem; color:var(--gold-light);">Active Pins Grid (@ARTEXDES)</h3>
           <p id="currentActiveBoardLabel">Displaying seamless patterns across all saved folders:</p>
         </div>
         <div class="gallery-filters" id="pinterestBoardFilters" style="flex-wrap:wrap; gap:6px;">
