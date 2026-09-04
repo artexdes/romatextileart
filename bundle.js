@@ -1016,6 +1016,12 @@ function exportSeamlessTile(tileCanvas, size = 2048) {
 }
 
 // ════════════ 4. PHOTOREALISTIC 3D FULL-SHIRT MOCKUP DRAPING ENGINE ════════════
+const FABRIC_TYPES = [
+  { id: 'linen', name: 'Raw Linen Weave', sheen: 0.2, contrast: 1.15 },
+  { id: 'silk', name: 'Silk Twill / Satin', sheen: 0.45, contrast: 1.25 },
+  { id: 'cotton', name: 'Heavy Cotton Canvas', sheen: 0.12, contrast: 1.05 }
+];
+
 const shirtMockupAssets = {
   base: new Image(),
   mask: new Image(),
@@ -1156,6 +1162,10 @@ function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
       gCtx.drawImage(shirtMockupAssets.highlights, 0, 0, w, h);
       gCtx.globalAlpha = 1.0;
     }
+
+    // Re-apply shirt silhouette mask to ensure zero edge bleeding from multiply/screen passes
+    gCtx.globalCompositeOperation = 'destination-in';
+    gCtx.drawImage(shirtMockupAssets.mask, 0, 0, w, h);
 
     // Draw masked & shaded 3D draped garment onto target canvas
     ctx.drawImage(garmentCanvas, 0, 0, w, h);

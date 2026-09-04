@@ -226,6 +226,10 @@ export function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
       gCtx.globalAlpha = 1.0;
     }
 
+    // Re-apply shirt silhouette mask to ensure zero edge bleeding from multiply/screen passes
+    gCtx.globalCompositeOperation = 'destination-in';
+    gCtx.drawImage(shirtMockupAssets.mask, 0, 0, w, h);
+
     // Draw masked & shaded 3D draped garment onto target canvas
     ctx.drawImage(garmentCanvas, 0, 0, w, h);
 
