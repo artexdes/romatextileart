@@ -2197,11 +2197,7 @@ function setupPinterestHub() {
     const isAll = boardFilter === 'all' || boardFilter === 'All Pins';
     if (!isAll) {
       const bf = boardFilter.toLowerCase().trim();
-      filtered = filtered.filter(p => {
-        if (!p.board) return false;
-        const pb = p.board.toLowerCase().trim();
-        return pb === bf || pb.includes(bf) || bf.includes(pb);
-      });
+      filtered = filtered.filter(p => p.board && p.board.toLowerCase().trim() === bf);
       if (filtered.length === 0) {
         pinContainer.innerHTML = `
           <div style="grid-column: 1 / -1; text-align: center; padding: 50px 20px; color: var(--gold-light);">
