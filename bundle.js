@@ -1015,15 +1015,51 @@ function exportSeamlessTile(tileCanvas, size = 2048) {
   return exportCanvas.toDataURL('image/png');
 }
 
-// ════════════ 5. REALISTIC SHIRT MOCKUP ENGINE ════════════
-const FABRIC_TYPES = [
-  { id: 'linen', name: 'Raw Linen Weave', sheen: 0.15, contrast: 1.15 },
-  { id: 'silk', name: 'Silk Twill / Satin', sheen: 0.45, contrast: 1.25 },
-  { id: 'cotton', name: 'Heavy Cotton Canvas', sheen: 0.1, contrast: 1.05 }
-];
+// ════════════ 4. PHOTOREALISTIC 3D FULL-SHIRT MOCKUP DRAPING ENGINE ════════════
+const shirtMockupAssets = {
+  base: new Image(),
+  mask: new Image(),
+  shadows: new Image(),
+  highlights: new Image(),
+  buttons: new Image(),
+  loaded: false
+};
+
+function preloadShirtMockupAssets() {
+  shirtMockupAssets.base.crossOrigin = 'anonymous';
+  shirtMockupAssets.mask.crossOrigin = 'anonymous';
+  shirtMockupAssets.shadows.crossOrigin = 'anonymous';
+  shirtMockupAssets.highlights.crossOrigin = 'anonymous';
+  shirtMockupAssets.buttons.crossOrigin = 'anonymous';
+
+  shirtMockupAssets.base.src = './assets/shirt-mockup/shirt-base.jpg';
+  shirtMockupAssets.mask.src = './assets/shirt-mockup/shirt-mask.png';
+  shirtMockupAssets.shadows.src = './assets/shirt-mockup/shirt-shadows.png';
+  shirtMockupAssets.highlights.src = './assets/shirt-mockup/shirt-highlights.png';
+  shirtMockupAssets.buttons.src = './assets/shirt-mockup/shirt-buttons.png';
+
+  let count = 0;
+  const onAssetLoad = () => {
+    count++;
+    if (count >= 4) {
+      shirtMockupAssets.loaded = true;
+      if (typeof updateMockupPreview === 'function') {
+        updateMockupPreview();
+      }
+    }
+  };
+
+  shirtMockupAssets.base.onload = onAssetLoad;
+  shirtMockupAssets.mask.onload = onAssetLoad;
+  shirtMockupAssets.shadows.onload = onAssetLoad;
+  shirtMockupAssets.highlights.onload = onAssetLoad;
+  shirtMockupAssets.buttons.onload = onAssetLoad;
+}
 
 function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
   const {
+    mode = (state && state.repeatMode) || 'half-drop',
+    repeatScale = (state && state.repeatScale) || 1.0,
     scale = 0.35,
     rotation = 0,
     offsetX = 0,
@@ -1042,308 +1078,102 @@ function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
 
   ctx.clearRect(0, 0, w, h);
 
+  // 1. Studio backdrop vignette (dark luxury atelier lighting)
   if (!transparentBg) {
-    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 80, w / 2, h / 2, w * 0.7);
-    bgGrad.addColorStop(0, '#1c202a');
-    bgGrad.addColorStop(0.6, '#13161e');
-    bgGrad.addColorStop(1, '#0b0d13');
+    const bgGrad = ctx.createRadialGradient(w / 2, h / 2, 80, w / 2, h / 2, w * 0.72);
+    bgGrad.addColorStop(0, '#1d222e');
+    bgGrad.addColorStop(0.55, '#131722');
+    bgGrad.addColorStop(1, '#090b10');
     ctx.fillStyle = bgGrad;
     ctx.fillRect(0, 0, w, h);
 
+    // Realistic ambient floor contact shadow
     ctx.save();
     ctx.beginPath();
-    ctx.ellipse(w / 2, h * 0.89, w * 0.38, h * 0.05, 0, 0, Math.PI * 2);
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-    ctx.filter = 'blur(20px)';
+    ctx.ellipse(w / 2, h * 0.94, w * 0.42, h * 0.05, 0, 0, Math.PI * 2);
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.filter = 'blur(22px)';
     ctx.fill();
     ctx.restore();
   }
 
-  const cx = w / 2;
-  const cy = h * 0.49;
-  const sw = w * 0.78;
-  const sh = h * 0.82;
+  if (!patternCanvas) return;
 
-  const buildShirtPath = (pathCtx) => {
-    pathCtx.beginPath();
-    pathCtx.moveTo(cx - sw * 0.12, cy - sh * 0.44);
-    pathCtx.quadraticCurveTo(cx, cy - sh * 0.42, cx + sw * 0.12, cy - sh * 0.44);
-    pathCtx.quadraticCurveTo(cx + sw * 0.28, cy - sh * 0.42, cx + sw * 0.36, cy - sh * 0.36);
-    pathCtx.lineTo(cx + sw * 0.54, cy - sh * 0.14);
-    pathCtx.quadraticCurveTo(cx + sw * 0.52, cy - sh * 0.04, cx + sw * 0.43, cy - sh * 0.01);
-    pathCtx.quadraticCurveTo(cx + sw * 0.34, cy - sh * 0.08, cx + sw * 0.31, cy - sh * 0.12);
-    pathCtx.quadraticCurveTo(cx + sw * 0.30, cy + sh * 0.15, cx + sw * 0.32, cy + sh * 0.42);
-    pathCtx.quadraticCurveTo(cx, cy + sh * 0.46, cx - sw * 0.32, cy + sh * 0.42);
-    pathCtx.quadraticCurveTo(cx - sw * 0.30, cy + sh * 0.15, cx - sw * 0.31, cy - sh * 0.12);
-    pathCtx.quadraticCurveTo(cx - sw * 0.34, cy - sh * 0.08, cx - sw * 0.43, cy - sh * 0.01);
-    pathCtx.quadraticCurveTo(cx - sw * 0.52, cy - sh * 0.04, cx - sw * 0.54, cy - sh * 0.14);
-    pathCtx.lineTo(cx - sw * 0.36, cy - sh * 0.36);
-    pathCtx.quadraticCurveTo(cx - sw * 0.28, cy - sh * 0.42, cx - sw * 0.12, cy - sh * 0.44);
-    pathCtx.closePath();
-  };
+  // 2. Prepare seamless pattern buffer using the EXACT user-configured repeat mode:
+  const patBuffer = document.createElement('canvas');
+  patBuffer.width = w;
+  patBuffer.height = h;
 
-  ctx.save();
-  buildShirtPath(ctx);
-  ctx.clip();
+  // Combine repeat scale from Repeat Studio with garment scale slider
+  const effectiveTileScale = Math.max(0.08, (repeatScale || 1.0) * (scale || 0.35));
 
-  const patternSize = Math.max(30, 512 * scale);
-  const rotRad = (rotation * Math.PI) / 180;
+  // Render the exact seamless repeat (grid/straight, half-drop, brick, mirror)
+  renderRepeatPattern(patternCanvas, patBuffer, {
+    mode: mode,
+    scale: effectiveTileScale,
+    offsetX: offsetX,
+    offsetY: offsetY
+  });
 
-  ctx.save();
-  ctx.translate(cx + offsetX, cy + offsetY);
-  ctx.rotate(rotRad);
+  // Handle pattern rotation on shirt if specified
+  let drapedPattern = patBuffer;
+  if (rotation && rotation !== 0) {
+    const rotCanvas = document.createElement('canvas');
+    rotCanvas.width = w;
+    rotCanvas.height = h;
+    const rCtx = rotCanvas.getContext('2d');
+    rCtx.save();
+    rCtx.translate(w / 2, h / 2);
+    rCtx.rotate((rotation * Math.PI) / 180);
+    rCtx.drawImage(patBuffer, -w / 2, -h / 2);
+    rCtx.restore();
+    drapedPattern = rotCanvas;
+  }
 
-  const startX = -w;
-  const endX = w * 2;
-  const startY = -h;
-  const endY = h * 2;
+  // 3. 3D Photorealistic Full-Shirt Composite
+  if (shirtMockupAssets.loaded || (shirtMockupAssets.mask.complete && shirtMockupAssets.mask.naturalWidth > 0)) {
+    const garmentCanvas = document.createElement('canvas');
+    garmentCanvas.width = w;
+    garmentCanvas.height = h;
+    const gCtx = garmentCanvas.getContext('2d');
 
-  for (let x = startX; x < endX; x += patternSize) {
-    const isOdd = Math.abs(Math.floor(x / patternSize)) % 2 === 1;
-    const shiftY = isOdd ? patternSize * 0.5 : 0;
-    for (let y = startY; y < endY; y += patternSize) {
-      ctx.drawImage(patternCanvas, x - cx, y - cy + shiftY, patternSize, patternSize);
+    // A. Mask repeat pattern to real tailored full-sleeve shirt silhouette
+    gCtx.drawImage(drapedPattern, 0, 0, w, h);
+    gCtx.globalCompositeOperation = 'destination-in';
+    gCtx.drawImage(shirtMockupAssets.mask, 0, 0, w, h);
+
+    // B. Multiply 3D Fabric Wrinkles & Fold Shadows
+    if (showShadows && shirtMockupAssets.shadows.complete) {
+      gCtx.globalCompositeOperation = 'multiply';
+      gCtx.drawImage(shirtMockupAssets.shadows, 0, 0, w, h);
     }
-  }
-  ctx.restore();
 
-  const fabric = FABRIC_TYPES.find(f => f.id === fabricType) || FABRIC_TYPES[0];
-  ctx.save();
-  ctx.globalCompositeOperation = 'overlay';
-  ctx.globalAlpha = 0.18;
-  ctx.strokeStyle = '#ffffff';
-  ctx.lineWidth = 0.8;
-  for (let i = 0; i < w; i += 4) {
-    ctx.beginPath();
-    ctx.moveTo(i, 0);
-    ctx.lineTo(i, h);
-    ctx.stroke();
-  }
-  for (let j = 0; j < h; j += 4) {
-    ctx.beginPath();
-    ctx.moveTo(0, j);
-    ctx.lineTo(w, j);
-    ctx.stroke();
-  }
-  ctx.restore();
-
-  if (showShadows) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'multiply';
-
-    const bodyShadow = ctx.createRadialGradient(cx, cy + sh * 0.1, sw * 0.1, cx, cy + sh * 0.1, sw * 0.55);
-    bodyShadow.addColorStop(0, 'rgba(0, 0, 0, 0)');
-    bodyShadow.addColorStop(0.7, 'rgba(0, 0, 0, 0.22)');
-    bodyShadow.addColorStop(1, 'rgba(0, 0, 0, 0.65)');
-    ctx.fillStyle = bodyShadow;
-    ctx.fillRect(0, 0, w, h);
-
-    ctx.strokeStyle = 'rgba(0, 0, 0, 0.45)';
-    ctx.lineWidth = 14;
-    ctx.lineCap = 'round';
-    ctx.filter = 'blur(8px)';
-
-    ctx.beginPath();
-    ctx.moveTo(cx + sw * 0.32, cy - sh * 0.12);
-    ctx.quadraticCurveTo(cx + sw * 0.42, cy - sh * 0.16, cx + sw * 0.48, cy - sh * 0.08);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(cx - sw * 0.32, cy - sh * 0.12);
-    ctx.quadraticCurveTo(cx - sw * 0.42, cy - sh * 0.16, cx - sw * 0.48, cy - sh * 0.08);
-    ctx.stroke();
-
-    ctx.lineWidth = 12;
-    ctx.beginPath();
-    ctx.moveTo(cx - sw * 0.18, cy + sh * 0.15);
-    ctx.quadraticCurveTo(cx - sw * 0.05, cy + sh * 0.22, cx + sw * 0.08, cy + sh * 0.18);
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.moveTo(cx + sw * 0.18, cy + sh * 0.32);
-    ctx.quadraticCurveTo(cx + sw * 0.02, cy + sh * 0.35, cx - sw * 0.12, cy + sh * 0.28);
-    ctx.stroke();
-
-    ctx.fillStyle = 'rgba(0, 0, 0, 0.35)';
-    ctx.fillRect(cx + 6, cy - sh * 0.28, 12, sh * 0.72);
-
-    ctx.restore();
-  }
-
-  if (showHighlights) {
-    ctx.save();
-    ctx.globalCompositeOperation = 'screen';
-    ctx.globalAlpha = fabric.sheen;
-    ctx.filter = 'blur(12px)';
-
-    const chestHl = ctx.createLinearGradient(cx - sw * 0.25, cy - sh * 0.1, cx + sw * 0.25, cy + sh * 0.1);
-    chestHl.addColorStop(0, 'rgba(255, 255, 255, 0.4)');
-    chestHl.addColorStop(0.5, 'rgba(255, 255, 255, 0.8)');
-    chestHl.addColorStop(1, 'rgba(255, 255, 255, 0.2)');
-    ctx.fillStyle = chestHl;
-    ctx.beginPath();
-    ctx.ellipse(cx, cy - sh * 0.05, sw * 0.2, sh * 0.22, -0.1, 0, Math.PI * 2);
-    ctx.fill();
-
-    ctx.beginPath();
-    ctx.ellipse(cx - sw * 0.24, cy - sh * 0.38, sw * 0.12, 14, -0.4, 0, Math.PI * 2);
-    ctx.ellipse(cx + sw * 0.24, cy - sh * 0.38, sw * 0.12, 14, 0.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
-  ctx.restore();
-
-  // Collar, Placket, and Buttons
-  ctx.save();
-  const placketW = 32;
-  const placketGrad = ctx.createLinearGradient(cx - placketW / 2, 0, cx + placketW / 2, 0);
-  placketGrad.addColorStop(0, 'rgba(0, 0, 0, 0.35)');
-  placketGrad.addColorStop(0.2, 'rgba(255, 255, 255, 0.15)');
-  placketGrad.addColorStop(0.8, 'rgba(255, 255, 255, 0.05)');
-  placketGrad.addColorStop(1, 'rgba(0, 0, 0, 0.4)');
-  ctx.fillStyle = placketGrad;
-  ctx.fillRect(cx - placketW / 2, cy - sh * 0.24, placketW, sh * 0.69);
-
-  ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-  ctx.lineWidth = 1.2;
-  ctx.setLineDash([4, 4]);
-  ctx.beginPath();
-  ctx.moveTo(cx - placketW / 2 + 3, cy - sh * 0.24);
-  ctx.lineTo(cx - placketW / 2 + 3, cy + sh * 0.45);
-  ctx.stroke();
-
-  ctx.beginPath();
-  ctx.moveTo(cx + placketW / 2 - 3, cy - sh * 0.24);
-  ctx.lineTo(cx + placketW / 2 - 3, cy + sh * 0.45);
-  ctx.stroke();
-  ctx.setLineDash([]);
-
-  const drawCollarWing = (isRight) => {
-    ctx.save();
-    const sign = isRight ? 1 : -1;
-
-    ctx.beginPath();
-    ctx.moveTo(cx, cy - sh * 0.41);
-    ctx.lineTo(cx + sign * sw * 0.11, cy - sh * 0.44);
-    ctx.lineTo(cx + sign * sw * 0.17, cy - sh * 0.35);
-    ctx.lineTo(cx + sign * sw * 0.13, cy - sh * 0.32);
-    ctx.lineTo(cx + sign * sw * 0.18, cy - sh * 0.22);
-    ctx.lineTo(cx + sign * 6, cy - sh * 0.25);
-    ctx.closePath();
-
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.65)';
-    ctx.shadowBlur = 12;
-    ctx.shadowOffsetX = sign * 4;
-    ctx.shadowOffsetY = 6;
-
-    ctx.save();
-    ctx.clip();
-    ctx.translate(cx, cy - sh * 0.32);
-    ctx.rotate(sign * 0.25);
-    for (let x = -sw * 0.3; x < sw * 0.3; x += patternSize) {
-      for (let y = -sh * 0.2; y < sh * 0.2; y += patternSize) {
-        ctx.drawImage(patternCanvas, x, y, patternSize, patternSize);
-      }
+    // C. Screen 3D Specular Light & Cloth Sheen
+    if (showHighlights && shirtMockupAssets.highlights.complete) {
+      const fabric = FABRIC_TYPES.find(f => f.id === fabricType) || FABRIC_TYPES[0];
+      gCtx.globalCompositeOperation = 'screen';
+      gCtx.globalAlpha = fabric.sheen || 0.25;
+      gCtx.drawImage(shirtMockupAssets.highlights, 0, 0, w, h);
+      gCtx.globalAlpha = 1.0;
     }
-    const cGrad = ctx.createLinearGradient(cx, cy - sh * 0.4, cx + sign * sw * 0.18, cy - sh * 0.22);
-    cGrad.addColorStop(0, 'rgba(255, 255, 255, 0.2)');
-    cGrad.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
-    ctx.fillStyle = cGrad;
-    ctx.fillRect(-sw * 0.3, -sh * 0.2, sw * 0.6, sh * 0.4);
-    ctx.restore();
 
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.lineWidth = 1.2;
-    ctx.setLineDash([3, 3]);
-    ctx.stroke();
-    ctx.restore();
-  };
+    // Draw masked & shaded 3D draped garment onto target canvas
+    ctx.drawImage(garmentCanvas, 0, 0, w, h);
 
-  drawCollarWing(false);
-  drawCollarWing(true);
-
-  ctx.save();
-  ctx.beginPath();
-  ctx.moveTo(cx - sw * 0.11, cy - sh * 0.44);
-  ctx.quadraticCurveTo(cx, cy - sh * 0.36, cx + sw * 0.11, cy - sh * 0.44);
-  ctx.lineTo(cx, cy - sh * 0.32);
-  ctx.closePath();
-  ctx.fillStyle = '#11141c';
-  ctx.fill();
-
-  const tagW = 68;
-  const tagH = 26;
-  ctx.fillStyle = '#0a0d14';
-  ctx.fillRect(cx - tagW / 2, cy - sh * 0.42, tagW, tagH);
-  ctx.strokeStyle = '#d4af37';
-  ctx.lineWidth = 1;
-  ctx.strokeRect(cx - tagW / 2, cy - sh * 0.42, tagW, tagH);
-
-  ctx.fillStyle = '#d4af37';
-  ctx.font = 'bold 8px Inter, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText('ROMATEXTILEART', cx, cy - sh * 0.42 + 12);
-  ctx.font = '6px Inter, sans-serif';
-  ctx.fillStyle = '#aaaaaa';
-  ctx.fillText('100% ARTISAN', cx, cy - sh * 0.42 + 20);
-  ctx.restore();
-
-  if (showButtons) {
-    const buttonYs = [
-      cy - sh * 0.21,
-      cy - sh * 0.07,
-      cy + sh * 0.08,
-      cy + sh * 0.23,
-      cy + sh * 0.38
-    ];
-
-    buttonYs.forEach(btnY => {
-      const br = 8.5;
-
+    // D. Genuine Mother-of-Pearl Buttons & Inner Collar Stand
+    if (showButtons && shirtMockupAssets.buttons.complete && shirtMockupAssets.buttons.naturalWidth > 0) {
       ctx.save();
-      ctx.translate(cx, btnY);
-
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
-      ctx.shadowBlur = 6;
-      ctx.shadowOffsetY = 3;
-
-      const btnGrad = ctx.createRadialGradient(-2, -2, 1, 0, 0, br);
-      btnGrad.addColorStop(0, '#ffffff');
-      btnGrad.addColorStop(0.7, '#e4e2dd');
-      btnGrad.addColorStop(1, '#b8b4ab');
-      ctx.fillStyle = btnGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, br, 0, Math.PI * 2);
-      ctx.fill();
-
-      ctx.strokeStyle = '#999488';
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.arc(0, 0, br - 2.2, 0, Math.PI * 2);
-      ctx.stroke();
-
-      const holeD = 2.4;
-      ctx.fillStyle = '#3a3832';
-      [[-holeD, -holeD], [holeD, -holeD], [-holeD, holeD], [holeD, holeD]].forEach(([hx, hy]) => {
-        ctx.beginPath();
-        ctx.arc(hx, hy, 0.9, 0, Math.PI * 2);
-        ctx.fill();
-      });
-
-      ctx.strokeStyle = '#d4af37';
-      ctx.lineWidth = 0.8;
-      ctx.beginPath();
-      ctx.moveTo(-holeD, -holeD);
-      ctx.lineTo(holeD, holeD);
-      ctx.moveTo(holeD, -holeD);
-      ctx.lineTo(-holeD, holeD);
-      ctx.stroke();
-
+      ctx.drawImage(shirtMockupAssets.buttons, 0, 0, w, h);
       ctx.restore();
-    });
+    }
+  } else {
+    // Immediate fallback while images are loading
+    ctx.save();
+    ctx.drawImage(drapedPattern, 0, 0, w, h);
+    ctx.restore();
   }
 
+  // 4. Atelier Brand Watermark
   if (showWatermark) {
     ctx.save();
     ctx.font = '600 13px Inter, sans-serif';
@@ -1352,11 +1182,9 @@ function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
     ctx.fillText('ROMATEXTILEART · ARTEXDES', w - 30, h - 38);
     ctx.font = '400 11px Inter, sans-serif';
     ctx.fillStyle = 'rgba(255, 255, 255, 0.45)';
-    ctx.fillText('Pinterest · Shutterstock · Instagram Portfolio', w - 30, h - 20);
+    ctx.fillText('3D Tailored Bespoke Garment Draping', w - 30, h - 20);
     ctx.restore();
   }
-
-  ctx.restore();
 }
 
 function exportHighResMockup(patternCanvas, options = {}) {
@@ -1851,6 +1679,27 @@ function updateRepeatPreview() {
 }
 
 function setupMockupStudio() {
+  // Sync repeat mode chips directly on mockup
+  document.querySelectorAll('[data-mockup-repeat]').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('[data-mockup-repeat]').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      state.repeatMode = chip.dataset.mockupRepeat;
+
+      // Sync radio in Repeat Studio
+      const rRadio = document.querySelector(`input[name="repeatMode"][value="${state.repeatMode}"]`);
+      if (rRadio) {
+        rRadio.checked = true;
+        document.querySelectorAll('#repeatPane .radio-card').forEach(rc => rc.classList.remove('active'));
+        rRadio.closest('.radio-card')?.classList.add('active');
+      }
+
+      updateMockupPreview();
+      updateRepeatPreview();
+      showToast(`Shirt Pattern Repeat: ${chip.textContent.trim()}`);
+    });
+  });
+
   el.mockupScaleSlider.addEventListener('input', e => {
     state.mockupScale = parseFloat(e.target.value);
     el.mockupScaleVal.textContent = `${Math.round(state.mockupScale * 100)}%`;
@@ -1889,21 +1738,25 @@ function setupMockupStudio() {
   el.btnDownloadMockup.addEventListener('click', () => {
     const colouredTile = getCurrentlyColouredPatternCanvas();
     const highResUrl = exportHighResMockup(colouredTile, {
-      scale: state.mockupScale,
-      rotation: state.mockupRotation,
-      fabricType: state.mockupFabric,
-      showShadows: state.mockupShadows,
-      showHighlights: state.mockupHighlights,
-      showButtons: state.mockupButtons,
+      mode: state.repeatMode || 'half-drop',
+      repeatScale: state.repeatScale || 1.0,
+      scale: state.mockupScale || 0.35,
+      rotation: state.mockupRotation || 0,
+      offsetX: state.mockupOffsetX || 0,
+      offsetY: state.mockupOffsetY || 0,
+      fabricType: state.mockupFabric || 'linen',
+      showShadows: state.mockupShadows !== false,
+      showHighlights: state.mockupHighlights !== false,
+      showButtons: state.mockupButtons !== false,
       showWatermark: true,
       transparentBg: false
     });
 
     const link = document.createElement('a');
-    link.download = `ROMATEXTILEART_ResortShirtMockup_${state.activeColorway.toUpperCase()}_300DPI.png`;
+    link.download = `ROMATEXTILEART_3DShirtMockup_${state.activeColorway.toUpperCase()}_300DPI.png`;
     link.href = highResUrl;
     link.click();
-    showToast('Downloaded High-Res 2048px Apparel Mockup PNG');
+    showToast('Downloaded High-Res 2048px 3D Shirt Mockup PNG');
   });
 
   let isDragging = false;
@@ -1943,15 +1796,22 @@ function updateMockupPreview() {
   el.mockupCanvas.width = 1024;
   el.mockupCanvas.height = 1024;
 
+  // Sync mockup repeat chips active state
+  document.querySelectorAll('[data-mockup-repeat]').forEach(chip => {
+    chip.classList.toggle('active', chip.dataset.mockupRepeat === (state.repeatMode || 'half-drop'));
+  });
+
   renderShirtDrape(colouredTile, el.mockupCanvas, {
-    scale: state.mockupScale,
-    rotation: state.mockupRotation,
-    offsetX: state.mockupOffsetX,
-    offsetY: state.mockupOffsetY,
-    fabricType: state.mockupFabric,
-    showShadows: state.mockupShadows,
-    showHighlights: state.mockupHighlights,
-    showButtons: state.mockupButtons,
+    mode: state.repeatMode || 'half-drop',
+    repeatScale: state.repeatScale || 1.0,
+    scale: state.mockupScale || 0.35,
+    rotation: state.mockupRotation || 0,
+    offsetX: state.mockupOffsetX || 0,
+    offsetY: state.mockupOffsetY || 0,
+    fabricType: state.mockupFabric || 'linen',
+    showShadows: state.mockupShadows !== false,
+    showHighlights: state.mockupHighlights !== false,
+    showButtons: state.mockupButtons !== false,
     showWatermark: true,
     transparentBg: false
   });
@@ -3856,6 +3716,7 @@ function initApp() {
   initElements();
   setupTabRouting();
   preloadPatternCanvases();
+  preloadShirtMockupAssets();
   setupFabricFlowEngine();
   setupPeachweb3dEngine();
   setupLiquidSculpturesEngine();
