@@ -219,7 +219,12 @@ export function renderShirtDrape(patternCanvas, targetCanvas, options = {}) {
 
     // C. Screen 3D Specular Light & Cloth Sheen
     if (showHighlights && shirtMockupAssets.highlights.complete) {
-      const fabric = FABRIC_TYPES.find(f => f.id === fabricType) || FABRIC_TYPES[0];
+      const fabricList = (typeof FABRIC_TYPES !== 'undefined' && Array.isArray(FABRIC_TYPES)) ? FABRIC_TYPES : [
+        { id: 'linen', name: 'Raw Linen Weave', sheen: 0.2, contrast: 1.15 },
+        { id: 'silk', name: 'Silk Twill / Satin', sheen: 0.45, contrast: 1.25 },
+        { id: 'cotton', name: 'Heavy Cotton Canvas', sheen: 0.12, contrast: 1.05 }
+      ];
+      const fabric = fabricList.find(f => f.id === fabricType) || fabricList[0];
       gCtx.globalCompositeOperation = 'screen';
       gCtx.globalAlpha = fabric.sheen || 0.25;
       gCtx.drawImage(shirtMockupAssets.highlights, 0, 0, w, h);
